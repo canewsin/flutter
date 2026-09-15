@@ -3,15 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../utils.dart';
 import 'use_cases.dart';
 
 class DatePickerUseCase extends UseCase {
+  DatePickerUseCase();
+
   @override
   String get name => 'DatePicker';
 
   @override
   String get route => '/date-picker';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const _MainWidget();
@@ -25,16 +31,12 @@ class _MainWidget extends StatefulWidget {
 }
 
 class _MainWidgetState extends State<_MainWidget> {
-
   String pageTitle = getUseCaseName(DatePickerUseCase());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Center(
         child: TextButton(
           onPressed: () => showDatePicker(

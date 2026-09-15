@@ -8,6 +8,8 @@
 // void setState(VoidCallback fn) { }
 
 /// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'list_tile.dart';
 library;
 
 import 'dart:ui';
@@ -30,17 +32,19 @@ const double _kTrackWidth = 51.0;
 const Size _kSwitchSize = Size(59.0, 39.0);
 const double _kThumbExtensionFactor = 7.0;
 const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow>[
-  BoxShadow(
-    color: Color(0x26000000),
-    offset: Offset(0, 3),
-    blurRadius: 8.0,
-  ),
-  BoxShadow(
-    color: Color(0x0F000000),
-    offset: Offset(0, 3),
-    blurRadius: 1.0,
-  ),
+  BoxShadow(color: Color(0x26000000), offset: Offset(0, 3), blurRadius: 8.0),
+  BoxShadow(color: Color(0x0F000000), offset: Offset(0, 3), blurRadius: 1.0),
 ];
+// The drag distance (as a fraction of the track width) beyond which the switch
+// must be dragged to commit the state change.
+// This threshold is used when the user is dragging to a new state.
+const double _kDragCommitThreshold = 0.7;
+
+// The drag distance (as a fraction of the track width) past which the user must
+// drag back to reverse a state change that has already been visually committed
+// during the drag.
+// This threshold is used when the user is dragging back to the original state.
+const double _kDragReverseThreshold = 0.2;
 
 // Label sizes and padding taken from xcode inspector.
 // See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360.
@@ -65,6 +69,8 @@ const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightne
 ///
 /// Used to toggle the on/off state of a single setting.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=24tg_N4sdMQ}
+///
 /// The switch itself does not maintain its toggle state. Instead, when the
 /// toggle state of the switch changes, the widget calls the [onChanged]
 /// callback. Most widgets that use a switch will listen for the [onChanged]
@@ -80,13 +86,13 @@ const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightne
 ///
 /// {@tool snippet}
 ///
-/// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
-/// [MergeSemantics] is used to turn the entire [ListTile] into a single item
+/// This sample shows how to use a [CupertinoSwitch] in a [CupertinoListTile]. The
+/// [MergeSemantics] is used to turn the entire [CupertinoListTile] into a single item
 /// for accessibility tools.
 ///
 /// ```dart
 /// MergeSemantics(
-///   child: ListTile(
+///   child: CupertinoListTile(
 ///     title: const Text('Lights'),
 ///     trailing: CupertinoSwitch(
 ///       value: _lights,
@@ -117,12 +123,12 @@ class CupertinoSwitch extends StatefulWidget {
     required this.onChanged,
     @Deprecated(
       'Use activeTrackColor instead. '
-      'This feature was deprecated after v3.24.0-0.2.pre.'
+      'This feature was deprecated after v3.24.0-0.2.pre.',
     )
     Color? activeColor,
     @Deprecated(
       'Use inactiveTrackColor instead. '
-      'This feature was deprecated after v3.24.0-0.2.pre.'
+      'This feature was deprecated after v3.24.0-0.2.pre.',
     )
     Color? trackColor,
     Color? activeTrackColor,
@@ -145,12 +151,12 @@ class CupertinoSwitch extends StatefulWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.dragStartBehavior = DragStartBehavior.start,
-  })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        assert(activeTrackColor == null || activeColor == null),
-        assert(inactiveTrackColor == null || trackColor == null),
-        activeTrackColor = activeTrackColor ?? activeColor,
-        inactiveTrackColor = inactiveTrackColor ?? trackColor;
+  }) : assert(activeThumbImage != null || onActiveThumbImageError == null),
+       assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
+       assert(activeTrackColor == null || activeColor == null),
+       assert(inactiveTrackColor == null || trackColor == null),
+       activeTrackColor = activeTrackColor ?? activeColor,
+       inactiveTrackColor = inactiveTrackColor ?? trackColor;
 
   /// Whether this switch is on or off.
   final bool value;
@@ -190,7 +196,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///  * [inactiveTrackColor], the color to use for the track when the switch is off.
   @Deprecated(
     'Use activeTrackColor instead. '
-    'This feature was deprecated after v3.24.0-0.2.pre.'
+    'This feature was deprecated after v3.24.0-0.2.pre.',
   )
   Color? get activeColor => activeTrackColor;
 
@@ -214,7 +220,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///  * [inactiveTrackColor], the color to use for the track when the switch is off.
   @Deprecated(
     'Use inactiveTrackColor instead. '
-    'This feature was deprecated after v3.24.0-0.2.pre.'
+    'This feature was deprecated after v3.24.0-0.2.pre.',
   )
   Color? get trackColor => inactiveTrackColor;
 
@@ -302,7 +308,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///   onChanged: (bool value) { },
   ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return CupertinoColors.activeOrange.withOpacity(.48);
+  ///       return CupertinoColors.activeOrange.withValues(alpha: .48);
   ///     }
   ///     return null; // Use the default color.
   ///   }),
@@ -465,28 +471,45 @@ class CupertinoSwitch extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
-    properties.add(ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(
+      FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true),
+    );
+    properties.add(
+      ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'),
+    );
   }
 }
 
-class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin, ToggleableStateMixin {
+class _CupertinoSwitchState extends State<CupertinoSwitch>
+    with TickerProviderStateMixin, ToggleableStateMixin {
   final _SwitchPainter _painter = _SwitchPainter();
+
+  // The global position where the user first touched the screen. This value to
+  // calculate the initial drag delta.
+  Offset _dragStartPosition = Offset.zero;
+
+  // The cumulative horizontal drag delta, normalized as a fraction of the
+  // track width.
+  double _dragDelta = 0;
+
+  // The transient value of the switch determined by _dragDelta during a
+  // drag.
+  bool? _dragValue;
 
   @override
   void initState() {
     super.initState();
     positionController.duration = const Duration(milliseconds: 200);
     reactionController.duration = const Duration(milliseconds: 300);
+    position
+      ..curve = Curves.ease
+      ..reverseCurve = Curves.ease.flipped;
   }
 
   @override
   void didUpdateWidget(CupertinoSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
-      position
-        ..curve = Curves.ease
-        ..reverseCurve = Curves.ease.flipped;
       animateToValue();
     }
   }
@@ -498,9 +521,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   @override
-  ValueChanged<bool?>? get onChanged => widget.onChanged != null
-    ? _handleChanged
-    : null;
+  ValueChanged<bool?>? get onChanged => widget.onChanged != null ? _handleChanged : null;
 
   @override
   bool get tristate => false;
@@ -527,12 +548,12 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   WidgetStateProperty<MouseCursor> get _defaultMouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return MouseCursor.defer;
-      }
-      return kIsWeb ? SystemMouseCursors.click : MouseCursor.defer;
-    });
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return MouseCursor.defer;
+        }
+        return kIsWeb ? SystemMouseCursors.click : MouseCursor.defer;
+      });
 
   Color? _resolveTrackColor(Color? trackColor, Set<WidgetState> states) {
     if (trackColor is WidgetStateColor) {
@@ -555,39 +576,75 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     return trackInnerLength;
   }
 
+  void _handleOnTapDown(TapDownDetails details) {
+    if (isInteractive) {
+      _dragStartPosition = details.globalPosition;
+    }
+  }
+
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
       reactionController.forward();
-      _emitVibration();
+
+      if (_dragStartPosition != Offset.zero) {
+        final double delta = (details.globalPosition - _dragStartPosition).dx / _kTrackWidth;
+        _dragDelta = switch (Directionality.of(context)) {
+          TextDirection.rtl => -delta,
+          TextDirection.ltr => delta,
+        };
+      }
+
+      _dragValue = value;
     }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
-      position
-        ..curve = Curves.linear
-        ..reverseCurve = Curves.linear;
-      final double delta = details.primaryDelta! / _trackInnerLength;
-      positionController.value += switch (Directionality.of(context)) {
+      final double delta = details.primaryDelta! / _kTrackWidth;
+      _dragDelta += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
-        TextDirection.ltr =>  delta,
+        TextDirection.ltr => delta,
       };
+
+      final valueChangedWhileDragging = widget.value != _dragValue;
+
+      final double threshold = valueChangedWhileDragging
+          ? _kDragReverseThreshold
+          : _kDragCommitThreshold;
+      final double effectiveThreshold = widget.value ? -threshold : threshold;
+
+      final bool newDragValue = _dragDelta >= effectiveThreshold;
+
+      if (_dragValue != newDragValue) {
+        _emitVibration();
+
+        if (newDragValue) {
+          positionController.forward();
+        } else {
+          positionController.reverse();
+        }
+
+        _dragValue = newDragValue;
+      }
     }
   }
 
   bool _needsPositionAnimation = false;
 
   void _handleDragEnd(DragEndDetails details) {
-    if (position.value >= 0.5 != widget.value) {
+    if (_dragValue != widget.value) {
       widget.onChanged?.call(!widget.value);
       // Wait to finish the animation until widget.value has changed to
       // !widget.value as part of the widget.onChanged call above.
       setState(() {
         _needsPositionAnimation = true;
       });
-    } else {
-      animateToValue();
     }
+
+    _dragStartPosition = Offset.zero;
+    _dragDelta = 0;
+    _dragValue = null;
+
     reactionController.reverse();
   }
 
@@ -621,23 +678,18 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     final CupertinoThemeData theme = CupertinoTheme.of(context);
 
     final Color activeColor = CupertinoDynamicColor.resolve(
-      widget.activeTrackColor
-      ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
-      ?? CupertinoColors.systemGreen,
+      widget.activeTrackColor ??
+          ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null) ??
+          CupertinoColors.systemGreen,
       context,
     );
 
     final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
-      MediaQuery.onOffSwitchLabelsOf(context)
-        ? (CupertinoDynamicColor.resolve(
-            widget.onLabelColor ?? CupertinoColors.white,
-            context,
-          ),
-          CupertinoDynamicColor.resolve(
-            widget.offLabelColor ?? _kOffLabelColor,
-            context,
-          ),
-        )
+        MediaQuery.onOffSwitchLabelsOf(context)
+        ? (
+            CupertinoDynamicColor.resolve(widget.onLabelColor ?? CupertinoColors.white, context),
+            CupertinoDynamicColor.resolve(widget.offLabelColor ?? _kOffLabelColor, context),
+          )
         : null;
 
     // Colors need to be resolved in selected and non selected states separately
@@ -645,26 +697,35 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     final Set<WidgetState> activeStates = states..add(WidgetState.selected);
     final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
 
-    final Color effectiveActiveThumbColor = _resolveThumbColor(widget.thumbColor, activeStates)
-      ?? _widgetThumbColor.resolve(activeStates)
-      ?? CupertinoColors.white;
+    final Color effectiveActiveThumbColor =
+        _resolveThumbColor(widget.thumbColor, activeStates) ??
+        _widgetThumbColor.resolve(activeStates) ??
+        CupertinoColors.white;
 
-    final Color effectiveInactiveThumbColor = _resolveThumbColor(widget.inactiveThumbColor, inactiveStates)
-      ?? _widgetThumbColor.resolve(inactiveStates)
-      ?? effectiveActiveThumbColor;
+    final Color effectiveInactiveThumbColor =
+        _resolveThumbColor(widget.inactiveThumbColor, inactiveStates) ??
+        _widgetThumbColor.resolve(inactiveStates) ??
+        effectiveActiveThumbColor;
 
     final Color effectiveActiveTrackColor = _widgetTrackColor.resolve(activeStates) ?? activeColor;
 
     final Color? effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates);
 
-    final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates);
+    final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(
+      activeStates,
+    );
 
-    final Color effectiveInactiveTrackColor = _resolveTrackColor(widget.trackColor, inactiveStates)
-      ?? CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context);
+    final Color effectiveInactiveTrackColor =
+        _resolveTrackColor(widget.trackColor, inactiveStates) ??
+        CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context);
 
-    final Color? effectiveInactiveTrackOutlineColor = widget.trackOutlineColor?.resolve(inactiveStates);
+    final Color? effectiveInactiveTrackOutlineColor = widget.trackOutlineColor?.resolve(
+      inactiveStates,
+    );
 
-    final double? effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(inactiveStates);
+    final double? effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(
+      inactiveStates,
+    );
 
     final Icon? effectiveActiveIcon = widget.thumbIcon?.resolve(activeStates);
 
@@ -674,22 +735,26 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
     final Color effectiveInactiveIconColor = effectiveInactiveIcon?.color ?? CupertinoColors.black;
 
-    final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
-    final Color effectiveActivePressedThumbColor = _resolveThumbColor(widget.thumbColor, activePressedStates)
-      ?? _widgetThumbColor.resolve(activePressedStates)
-      ?? CupertinoColors.white;
+    final activePressedStates = activeStates..add(WidgetState.pressed);
+    final Color effectiveActivePressedThumbColor =
+        _resolveThumbColor(widget.thumbColor, activePressedStates) ??
+        _widgetThumbColor.resolve(activePressedStates) ??
+        CupertinoColors.white;
 
-    final Set<WidgetState> inactivePressedStates = inactiveStates..add(WidgetState.pressed);
-    final Color effectiveInactivePressedThumbColor = _resolveThumbColor(widget.thumbColor, inactivePressedStates)
-      ?? _widgetThumbColor.resolve(inactivePressedStates)
-      ?? CupertinoColors.white;
+    final inactivePressedStates = inactiveStates..add(WidgetState.pressed);
+    final Color effectiveInactivePressedThumbColor =
+        _resolveThumbColor(widget.thumbColor, inactivePressedStates) ??
+        _widgetThumbColor.resolve(inactivePressedStates) ??
+        CupertinoColors.white;
 
-    final WidgetStateProperty<MouseCursor> effectiveMouseCursor = widget.mouseCursor ?? _defaultMouseCursor;
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
+        widget.mouseCursor ?? _defaultMouseCursor;
 
     return Semantics(
       toggled: widget.value,
       child: GestureDetector(
         excludeFromSemantics: true,
+        onTapDown: _handleOnTapDown,
         onHorizontalDragStart: _handleDragStart,
         onHorizontalDragUpdate: _handleDragUpdate,
         onHorizontalDragEnd: _handleDragEnd,
@@ -708,13 +773,13 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..reactionFocusFade = reactionFocusFade
               ..reactionHoverFade = reactionHoverFade
               ..focusColor = CupertinoDynamicColor.resolve(
-                  widget.focusColor ??
-                  HSLColor
-                    .fromColor(activeColor.withOpacity(kCupertinoFocusColorOpacity))
-                    .withLightness(kCupertinoFocusColorBrightness)
-                    .withSaturation(kCupertinoFocusColorSaturation)
-                    .toColor(),
-                  context)
+                widget.focusColor ??
+                    HSLColor.fromColor(activeColor.withOpacity(kCupertinoFocusColorOpacity))
+                        .withLightness(kCupertinoFocusColorBrightness)
+                        .withSaturation(kCupertinoFocusColorSaturation)
+                        .toColor(),
+                context,
+              )
               ..downPosition = downPosition
               ..isFocused = states.contains(WidgetState.focused)
               ..isHovered = states.contains(WidgetState.hovered)
@@ -743,7 +808,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..inactiveIcon = effectiveInactiveIcon
               ..iconTheme = IconTheme.of(context)
               ..surfaceColor = theme.scaffoldBackgroundColor
-              ..positionController = positionController
+              ..positionController = positionController,
           ),
         ),
       ),
@@ -754,8 +819,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 class _SwitchPainter extends ToggleablePainter {
   AnimationController get positionController => _positionController!;
   AnimationController? _positionController;
-  set positionController(AnimationController? value) {
-    assert(value != null);
+  set positionController(AnimationController value) {
     if (value == _positionController) {
       return;
     }
@@ -764,7 +828,7 @@ class _SwitchPainter extends ToggleablePainter {
     _colorAnimation = CurvedAnimation(
       parent: positionController,
       curve: Curves.easeOut,
-      reverseCurve: Curves.easeIn
+      reverseCurve: Curves.easeIn,
     );
     notifyListeners();
   }
@@ -823,8 +887,7 @@ class _SwitchPainter extends ToggleablePainter {
 
   Color get activePressedColor => _activePressedColor!;
   Color? _activePressedColor;
-  set activePressedColor(Color? value) {
-    assert(value != null);
+  set activePressedColor(Color value) {
     if (value == _activePressedColor) {
       return;
     }
@@ -834,8 +897,7 @@ class _SwitchPainter extends ToggleablePainter {
 
   Color get inactivePressedColor => _inactivePressedColor!;
   Color? _inactivePressedColor;
-  set inactivePressedColor(Color? value) {
-    assert(value != null);
+  set inactivePressedColor(Color value) {
     if (value == _inactivePressedColor) {
       return;
     }
@@ -1009,12 +1071,14 @@ class _SwitchPainter extends ToggleablePainter {
   ImageErrorListener? _cachedThumbErrorListener;
   BoxPainter? _cachedThumbPainter;
 
-  ShapeDecoration _createDefaultThumbDecoration(Color color, ImageProvider? image, ImageErrorListener? errorListener) {
+  ShapeDecoration _createDefaultThumbDecoration(
+    Color color,
+    ImageProvider? image,
+    ImageErrorListener? errorListener,
+  ) {
     return ShapeDecoration(
       color: color,
-      image: image == null
-        ? null
-        : DecorationImage(image: image, onError: errorListener),
+      image: image == null ? null : DecorationImage(image: image, onError: errorListener),
       shape: const StadiumBorder(),
     );
   }
@@ -1049,17 +1113,19 @@ class _SwitchPainter extends ToggleablePainter {
     }
 
     _pressedThumbExtension = reaction.value * _kThumbExtensionFactor;
-    final Size thumbSize = Size(
-      _kThumbRadius * 2 + _pressedThumbExtension!,
-      _kThumbRadius * 2,
-    );
+    final thumbSize = Size(_kThumbRadius * 2 + _pressedThumbExtension!, _kThumbRadius * 2);
 
     final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
-    final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null
-      ? null
-      : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
-    final double? trackOutlineWidth = lerpDouble(inactiveTrackOutlineWidth, activeTrackOutlineWidth, colorValue);
+    final Color? trackOutlineColor =
+        inactiveTrackOutlineColor == null || activeTrackOutlineColor == null
+        ? null
+        : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
+    final double? trackOutlineWidth = lerpDouble(
+      inactiveTrackOutlineWidth,
+      activeTrackOutlineWidth,
+      colorValue,
+    );
 
     final Color lerpedThumbColor;
     if (!reaction.isDismissed) {
@@ -1082,22 +1148,33 @@ class _SwitchPainter extends ToggleablePainter {
     final ImageProvider? thumbImage = currentValue < 0.5 ? inactiveThumbImage : activeThumbImage;
 
     final ImageErrorListener? thumbErrorListener = currentValue < 0.5
-      ? onInactiveThumbImageError
-      : onActiveThumbImageError;
+        ? onInactiveThumbImageError
+        : onActiveThumbImageError;
 
-    final Paint paint = Paint()..color = trackColor;
+    final paint = Paint()..color = trackColor;
 
     final Offset trackPaintOffset = _computeTrackPaintOffset(size);
-    final Offset thumbPaintOffset = _computeThumbPaintOffset(trackPaintOffset, thumbSize, visualPosition);
+    final Offset thumbPaintOffset = _computeThumbPaintOffset(
+      trackPaintOffset,
+      thumbSize,
+      visualPosition,
+    );
 
-    final Rect trackRect = Rect.fromLTWH(
+    final trackRect = Rect.fromLTWH(
       trackPaintOffset.dx,
       trackPaintOffset.dy,
       _kTrackWidth,
       _kTrackHeight,
     );
 
-    _paintTrackWith(canvas, paint, trackPaintOffset, trackOutlineColor, trackOutlineWidth, trackRect);
+    _paintTrackWith(
+      canvas,
+      paint,
+      trackPaintOffset,
+      trackOutlineColor,
+      trackOutlineWidth,
+      trackRect,
+    );
 
     final double currentReactionValue = reaction.value;
     if (_onOffLabelColors != null) {
@@ -1122,26 +1199,22 @@ class _SwitchPainter extends ToggleablePainter {
       };
 
       // Draws '|' label.
-      final Rect onLabelRect = Rect.fromCenter(
+      final onLabelRect = Rect.fromCenter(
         center: onLabelOffset,
         width: _kOnLabelWidth,
         height: _kOnLabelHeight,
       );
-      final Paint onLabelPaint = Paint()
+      final onLabelPaint = Paint()
         ..color = onLabelColor.withOpacity(onLabelOpacity)
         ..style = PaintingStyle.fill;
       canvas.drawRect(onLabelRect, onLabelPaint);
 
       // Draws 'O' label.
-      final Paint offLabelPaint = Paint()
+      final offLabelPaint = Paint()
         ..color = offLabelColor.withOpacity(offLabelOpacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kOffLabelWidth;
-      canvas.drawCircle(
-        offLabelOffset,
-        _kOffLabelRadius,
-        offLabelPaint,
-      );
+      canvas.drawCircle(offLabelOffset, _kOffLabelRadius, offLabelPaint);
     }
     _paintThumbWith(
       thumbPaintOffset,
@@ -1171,34 +1244,43 @@ class _SwitchPainter extends ToggleablePainter {
     final double additionalThumbRadius = thumbSize.height / 2 - trackRadius;
 
     final double horizontalProgress = visualPosition * (trackInnerLength - _pressedThumbExtension!);
-    final double thumbHorizontalOffset = trackPaintOffset.dx + trackRadius + (_pressedThumbExtension! / 2) - thumbSize.width / 2 + horizontalProgress;
+    final double thumbHorizontalOffset =
+        trackPaintOffset.dx +
+        trackRadius +
+        (_pressedThumbExtension! / 2) -
+        thumbSize.width / 2 +
+        horizontalProgress;
     final double thumbVerticalOffset = trackPaintOffset.dy - additionalThumbRadius;
     return Offset(thumbHorizontalOffset, thumbVerticalOffset);
   }
 
-  void _paintTrackWith(Canvas canvas, Paint paint, Offset trackPaintOffset, Color? trackOutlineColor, double? trackOutlineWidth, Rect trackRect) {
+  void _paintTrackWith(
+    Canvas canvas,
+    Paint paint,
+    Offset trackPaintOffset,
+    Color? trackOutlineColor,
+    double? trackOutlineWidth,
+    Rect trackRect,
+  ) {
     const double trackRadius = _kTrackHeight / 2;
-    final RRect trackRRect = RRect.fromRectAndRadius(
-      trackRect,
-      const Radius.circular(trackRadius),
-    );
+    final trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(trackRadius));
 
     canvas.drawRRect(trackRRect, paint);
 
     // Paint the track outline.
     if (trackOutlineColor != null) {
-      final Rect outlineTrackRect = Rect.fromLTWH(
+      final outlineTrackRect = Rect.fromLTWH(
         trackPaintOffset.dx + 1,
         trackPaintOffset.dy + 1,
         _kTrackWidth - 2,
         _kTrackHeight - 2,
       );
-      final RRect outlineTrackRRect = RRect.fromRectAndRadius(
+      final outlineTrackRRect = RRect.fromRectAndRadius(
         outlineTrackRect,
         const Radius.circular(trackRadius),
       );
 
-      final Paint outlinePaint = Paint()
+      final outlinePaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = trackOutlineWidth ?? 2.0
         ..color = trackOutlineColor;
@@ -1208,7 +1290,7 @@ class _SwitchPainter extends ToggleablePainter {
 
     if (isFocused) {
       final RRect focusedOutline = trackRRect.inflate(1.75);
-      final Paint focusedPaint = Paint()
+      final focusedPaint = Paint()
         ..style = PaintingStyle.stroke
         ..color = focusColor
         ..strokeWidth = 3.5;
@@ -1229,23 +1311,25 @@ class _SwitchPainter extends ToggleablePainter {
   ) {
     try {
       _isPainting = true;
-      if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage || thumbErrorListener != _cachedThumbErrorListener) {
+      if (_cachedThumbPainter == null ||
+          thumbColor != _cachedThumbColor ||
+          thumbImage != _cachedThumbImage ||
+          thumbErrorListener != _cachedThumbErrorListener) {
         _cachedThumbColor = thumbColor;
         _cachedThumbImage = thumbImage;
         _cachedThumbErrorListener = thumbErrorListener;
         _cachedThumbPainter?.dispose();
-        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage, thumbErrorListener)
-          .createBoxPainter(_handleDecorationChanged);
+        _cachedThumbPainter = _createDefaultThumbDecoration(
+          thumbColor,
+          thumbImage,
+          thumbErrorListener,
+        ).createBoxPainter(_handleDecorationChanged);
       }
       final BoxPainter thumbPainter = _cachedThumbPainter!;
 
       _paintCupertinoThumbShadowAndBorder(canvas, thumbPaintOffset, thumbSize);
 
-      thumbPainter.paint(
-        canvas,
-        thumbPaintOffset,
-        configuration.copyWith(size: thumbSize),
-      );
+      thumbPainter.paint(canvas, thumbPaintOffset, configuration.copyWith(size: thumbSize));
 
       if (thumbIcon != null && thumbIcon.icon != null) {
         final Color iconColor = Color.lerp(inactiveIconColor, activeIconColor, currentValue)!;
@@ -1257,7 +1341,7 @@ class _SwitchPainter extends ToggleablePainter {
         final double? iconOpticalSize = thumbIcon.opticalSize ?? iconTheme?.opticalSize;
         final List<Shadow>? iconShadows = thumbIcon.shadows ?? iconTheme?.shadows;
 
-        final TextSpan textSpan = TextSpan(
+        final textSpan = TextSpan(
           text: String.fromCharCode(iconData.codePoint),
           style: TextStyle(
             fontVariations: <FontVariation>[
@@ -1280,7 +1364,8 @@ class _SwitchPainter extends ToggleablePainter {
         _textPainter.layout();
         final double additionalHorizontalOffset = (thumbSize.width - iconSize) / 2;
         final double additionalVerticalOffset = (thumbSize.height - iconSize) / 2;
-        final Offset offset = thumbPaintOffset + Offset(additionalHorizontalOffset, additionalVerticalOffset);
+        final Offset offset =
+            thumbPaintOffset + Offset(additionalHorizontalOffset, additionalVerticalOffset);
 
         _textPainter.paint(canvas, offset);
       }
@@ -1290,7 +1375,7 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   void _paintCupertinoThumbShadowAndBorder(Canvas canvas, Offset thumbPaintOffset, Size thumbSize) {
-    final RRect thumbBounds = RRect.fromLTRBR(
+    final thumbBounds = RRect.fromLTRBR(
       thumbPaintOffset.dx,
       thumbPaintOffset.dy,
       thumbPaintOffset.dx + thumbSize.width,
@@ -1300,10 +1385,7 @@ class _SwitchPainter extends ToggleablePainter {
     for (final BoxShadow shadow in _kSwitchBoxShadows) {
       canvas.drawRRect(thumbBounds.shift(shadow.offset), shadow.toPaint());
     }
-    canvas.drawRRect(
-      thumbBounds.inflate(0.5),
-      Paint()..color = const Color(0x0A000000),
-    );
+    canvas.drawRRect(thumbBounds.inflate(0.5), Paint()..color = const Color(0x0A000000));
   }
 
   @override

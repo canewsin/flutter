@@ -28,8 +28,9 @@ import 'image_provider.dart';
 ///
 /// The box has a [border], a body, and may cast a [boxShadow].
 ///
-/// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
-/// then the [borderRadius] property controls the roundness of the corners.
+/// The [shape] of the box can be [BoxShape.circle] or [BoxShape.rectangle]. If
+/// it is [BoxShape.rectangle], then the [borderRadius] property can be used to
+/// make it a rounded rectangle ([RRect]).
 ///
 /// The body of the box is painted in layers. The bottom-most layer is the
 /// [color], which fills the box. Above that is the [gradient], which also fills
@@ -130,7 +131,10 @@ class BoxDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(shape != BoxShape.circle || borderRadius == null); // Can't have a border radius if you're a circle.
+    assert(
+      shape != BoxShape.circle || borderRadius == null,
+      'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
+    ); // Can't have a border radius if you're a circle.
     return super.debugAssertIsValid();
   }
 
@@ -221,7 +225,7 @@ class BoxDecoration extends Decoration {
       case BoxShape.circle:
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
-        final Rect square = Rect.fromCircle(center: center, radius: radius);
+        final square = Rect.fromCircle(center: center, radius: radius);
         return Path()..addOval(square);
       case BoxShape.rectangle:
         if (borderRadius != null) {
@@ -248,26 +252,18 @@ class BoxDecoration extends Decoration {
   bool get isComplex => boxShadow != null;
 
   @override
-  BoxDecoration? lerpFrom(Decoration? a, double t) {
-    if (a == null) {
-      return scale(t);
-    }
-    if (a is BoxDecoration) {
-      return BoxDecoration.lerp(a, this, t);
-    }
-    return super.lerpFrom(a, t) as BoxDecoration?;
-  }
+  BoxDecoration? lerpFrom(Decoration? a, double t) => switch (a) {
+    null => scale(t),
+    BoxDecoration() => BoxDecoration.lerp(a, this, t),
+    _ => super.lerpFrom(a, t) as BoxDecoration?,
+  };
 
   @override
-  BoxDecoration? lerpTo(Decoration? b, double t) {
-    if (b == null) {
-      return scale(1.0 - t);
-    }
-    if (b is BoxDecoration) {
-      return BoxDecoration.lerp(this, b, t);
-    }
-    return super.lerpTo(b, t) as BoxDecoration?;
-  }
+  BoxDecoration? lerpTo(Decoration? b, double t) => switch (b) {
+    null => scale(1.0 - t),
+    BoxDecoration() => BoxDecoration.lerp(this, b, t),
+    _ => super.lerpTo(b, t) as BoxDecoration?,
+  };
 
   /// Linearly interpolate between two box decorations.
   ///
@@ -327,15 +323,15 @@ class BoxDecoration extends Decoration {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BoxDecoration
-        && other.color == color
-        && other.image == image
-        && other.border == border
-        && other.borderRadius == borderRadius
-        && listEquals<BoxShadow>(other.boxShadow, boxShadow)
-        && other.gradient == gradient
-        && other.backgroundBlendMode == backgroundBlendMode
-        && other.shape == shape;
+    return other is BoxDecoration &&
+        other.color == color &&
+        other.image == image &&
+        other.border == border &&
+        other.borderRadius == borderRadius &&
+        listEquals<BoxShadow>(other.boxShadow, boxShadow) &&
+        other.gradient == gradient &&
+        other.backgroundBlendMode == backgroundBlendMode &&
+        other.shape == shape;
   }
 
   @override
@@ -360,14 +356,23 @@ class BoxDecoration extends Decoration {
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
-    properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
-    properties.add(IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
+    properties.add(
+      DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null),
+    );
+    properties.add(
+      IterableProperty<BoxShadow>(
+        'boxShadow',
+        boxShadow,
+        defaultValue: null,
+        style: DiagnosticsTreeStyle.whitespace,
+      ),
+    );
     properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
     properties.add(EnumProperty<BoxShape>('shape', shape, defaultValue: BoxShape.rectangle));
   }
 
   @override
-  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) {
+  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) {
     assert((Offset.zero & size).contains(position));
     switch (shape) {
       case BoxShape.rectangle:
@@ -379,13 +384,14 @@ class BoxDecoration extends Decoration {
       case BoxShape.circle:
         // Circles are inscribed into our smallest dimension.
         final Offset center = size.center(Offset.zero);
-        final double distance = (position - center).distance;
-        return distance <= math.min(size.width, size.height) / 2.0;
+        final double radius = math.min(size.width, size.height) / 2.0;
+        // Comparing squared distances avoids computing sqrt(dx * dx + dy * dy).
+        return (position - center).distanceSquared <= radius * radius;
     }
   }
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
     assert(onChanged != null || image == null);
     return _BoxDecorationPainter(this, onChanged);
   }
@@ -404,7 +410,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
     if (_cachedBackgroundPaint == null ||
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
-      final Paint paint = Paint();
+      final paint = Paint();
       if (_decoration.backgroundBlendMode != null) {
         paint.blendMode = _decoration.backgroundBlendMode!;
       }
@@ -424,7 +430,10 @@ class _BoxDecorationPainter extends BoxPainter {
   void _paintBox(Canvas canvas, Rect rect, Paint paint, TextDirection? textDirection) {
     switch (_decoration.shape) {
       case BoxShape.circle:
-        assert(_decoration.borderRadius == null);
+        assert(
+          _decoration.borderRadius == null,
+          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
+        );
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
@@ -483,14 +492,16 @@ class _BoxDecorationPainter extends BoxPainter {
     }
 
     if (_decoration.border is Border) {
-      final Border border = _decoration.border! as Border;
+      final border = _decoration.border! as Border;
 
-      final EdgeInsets insets = EdgeInsets.fromLTRB(
-        _calculateAdjustedSide(border.left),
-        _calculateAdjustedSide(border.top),
-        _calculateAdjustedSide(border.right),
-        _calculateAdjustedSide(border.bottom),
-      ) / 2;
+      final EdgeInsets insets =
+          EdgeInsets.fromLTRB(
+            _calculateAdjustedSide(border.left),
+            _calculateAdjustedSide(border.top),
+            _calculateAdjustedSide(border.right),
+            _calculateAdjustedSide(border.bottom),
+          ) /
+          2;
 
       return Rect.fromLTRB(
         rect.left + insets.left,
@@ -499,16 +510,18 @@ class _BoxDecorationPainter extends BoxPainter {
         rect.bottom - insets.bottom,
       );
     } else if (_decoration.border is BorderDirectional && textDirection != null) {
-      final BorderDirectional border = _decoration.border! as BorderDirectional;
+      final border = _decoration.border! as BorderDirectional;
       final BorderSide leftSide = textDirection == TextDirection.rtl ? border.end : border.start;
       final BorderSide rightSide = textDirection == TextDirection.rtl ? border.start : border.end;
 
-      final EdgeInsets insets = EdgeInsets.fromLTRB(
-        _calculateAdjustedSide(leftSide),
-        _calculateAdjustedSide(border.top),
-        _calculateAdjustedSide(rightSide),
-        _calculateAdjustedSide(border.bottom),
-      ) / 2;
+      final EdgeInsets insets =
+          EdgeInsets.fromLTRB(
+            _calculateAdjustedSide(leftSide),
+            _calculateAdjustedSide(border.top),
+            _calculateAdjustedSide(rightSide),
+            _calculateAdjustedSide(border.bottom),
+          ) /
+          2;
 
       return Rect.fromLTRB(
         rect.left + insets.left,
@@ -529,14 +542,20 @@ class _BoxDecorationPainter extends BoxPainter {
     Path? clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:
-        assert(_decoration.borderRadius == null);
+        assert(
+          _decoration.borderRadius == null,
+          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
+        );
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
-        final Rect square = Rect.fromCircle(center: center, radius: radius);
+        final square = Rect.fromCircle(center: center, radius: radius);
         clipPath = Path()..addOval(square);
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null) {
-          clipPath = Path()..addRRect(_decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect));
+          clipPath = Path()
+            ..addRRect(
+              _decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect),
+            );
         }
     }
     _imagePainter!.paint(canvas, rect, clipPath, configuration);

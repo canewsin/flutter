@@ -88,7 +88,10 @@ class LookupBoundary extends InheritedWidget {
   /// method. The root of the tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}
-  static T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(BuildContext context, { Object? aspect }) {
+  static T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(
+    BuildContext context, {
+    Object? aspect,
+  }) {
     // The following call makes sure that context depends on something so
     // Element.didChangeDependencies is called when context moves in the tree
     // even when requested dependency remains unfulfilled (i.e. null is
@@ -99,6 +102,29 @@ class LookupBoundary extends InheritedWidget {
       return null;
     }
     context.dependOnInheritedElement(candidate, aspect: aspect);
+    return candidate.widget as T;
+  }
+
+  /// Obtains the nearest widget of the given type `T` within the current
+  /// [LookupBoundary] of `context`, which must be the type of a concrete
+  /// [InheritedWidget] subclass.
+  ///
+  /// This method behaves exactly like
+  /// [BuildContext.getInheritedWidgetOfExactType], except it only
+  /// considers [InheritedWidget]s of the specified type `T` between the
+  /// provided [BuildContext] and its closest [LookupBoundary] ancestor.
+  /// [InheritedWidget]s past that [LookupBoundary] are invisible to this
+  /// method. The root of the tree is treated as an implicit lookup boundary.
+  ///
+  /// {@macro flutter.widgets.BuildContext.getInheritedWidgetOfExactType}
+  static T? getInheritedWidgetOfExactType<T extends InheritedWidget>(
+    BuildContext context, {
+    Object? aspect,
+  }) {
+    final InheritedElement? candidate = getElementForInheritedWidgetOfExactType<T>(context);
+    if (candidate == null) {
+      return null;
+    }
     return candidate.widget as T;
   }
 
@@ -116,7 +142,9 @@ class LookupBoundary extends InheritedWidget {
   /// method. The root of the tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.getElementForInheritedWidgetOfExactType}
-  static InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>(BuildContext context) {
+  static InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>(
+    BuildContext context,
+  ) {
     final InheritedElement? candidate = context.getElementForInheritedWidgetOfExactType<T>();
     if (candidate == null) {
       return null;
@@ -261,8 +289,8 @@ class LookupBoundary extends InheritedWidget {
   static bool debugIsHidingAncestorWidgetOfExactType<T extends Widget>(BuildContext context) {
     bool? result;
     assert(() {
-      bool hiddenByBoundary = false;
-      bool ancestorFound = false;
+      var hiddenByBoundary = false;
+      var ancestorFound = false;
       context.visitAncestorElements((Element ancestor) {
         if (ancestor.widget.runtimeType == T) {
           ancestorFound = true;
@@ -273,7 +301,7 @@ class LookupBoundary extends InheritedWidget {
       });
       result = ancestorFound & hiddenByBoundary;
       return true;
-    } ());
+    }());
     return result!;
   }
 
@@ -284,8 +312,8 @@ class LookupBoundary extends InheritedWidget {
   static bool debugIsHidingAncestorStateOfType<T extends State>(BuildContext context) {
     bool? result;
     assert(() {
-      bool hiddenByBoundary = false;
-      bool ancestorFound = false;
+      var hiddenByBoundary = false;
+      var ancestorFound = false;
       context.visitAncestorElements((Element ancestor) {
         if (ancestor is StatefulElement && ancestor.state is T) {
           ancestorFound = true;
@@ -296,7 +324,7 @@ class LookupBoundary extends InheritedWidget {
       });
       result = ancestorFound & hiddenByBoundary;
       return true;
-    } ());
+    }());
     return result!;
   }
 
@@ -305,11 +333,13 @@ class LookupBoundary extends InheritedWidget {
   /// from the provided [BuildContext].
   ///
   /// This method throws when asserts are disabled.
-  static bool debugIsHidingAncestorRenderObjectOfType<T extends RenderObject>(BuildContext context) {
+  static bool debugIsHidingAncestorRenderObjectOfType<T extends RenderObject>(
+    BuildContext context,
+  ) {
     bool? result;
     assert(() {
-      bool hiddenByBoundary = false;
-      bool ancestorFound = false;
+      var hiddenByBoundary = false;
+      var ancestorFound = false;
       context.visitAncestorElements((Element ancestor) {
         if (ancestor is RenderObjectElement && ancestor.renderObject is T) {
           ancestorFound = true;
@@ -320,7 +350,7 @@ class LookupBoundary extends InheritedWidget {
       });
       result = ancestorFound & hiddenByBoundary;
       return true;
-    } ());
+    }());
     return result!;
   }
 

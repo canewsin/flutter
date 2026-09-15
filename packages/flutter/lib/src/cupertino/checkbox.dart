@@ -48,6 +48,8 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 
 /// A macOS style checkbox.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ua54JU7k1Us}
+///
 /// The checkbox itself does not maintain any state. Instead, when the state of
 /// the checkbox changes, the widget calls the [onChanged] callback. Most
 /// widgets that use a checkbox will listen for the [onChanged] callback and
@@ -63,6 +65,13 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 /// component is needed on iOS, the HIG encourages the developer to use switches
 /// ([CupertinoSwitch] in Flutter) instead, or to find a creative custom
 /// solution.
+///
+/// Visually, the checkbox is a square of [CupertinoCheckbox.width] pixels.
+/// However, the widget's tap target and layout size depend on the platform:
+///   * On desktop devices, the tap target matches the visual size.
+///   * On mobile devices, the tap target expands to a square of
+///     [kMinInteractiveDimensionCupertino] pixels to meet accessibility
+///     guidelines.
 ///
 /// {@tool dartpad}
 /// This example shows a toggleable [CupertinoCheckbox].
@@ -96,11 +105,12 @@ class CupertinoCheckbox extends StatefulWidget {
     required this.value,
     this.tristate = false,
     required this.onChanged,
+    this.mouseCursor,
     this.activeColor,
     @Deprecated(
       'Use fillColor instead. '
       'fillColor now manages the background color in all states. '
-      'This feature was deprecated after v3.24.0-0.2.pre.'
+      'This feature was deprecated after v3.24.0-0.2.pre.',
     )
     this.inactiveColor,
     this.fillColor,
@@ -110,6 +120,7 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
+    this.tapTargetSize,
     this.semanticLabel,
   }) : assert(tristate || value != null);
 
@@ -150,6 +161,30 @@ class CupertinoCheckbox extends StatefulWidget {
   /// ```
   final ValueChanged<bool?>? onChanged;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  ///
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// When [value] is null and [tristate] is true, [WidgetState.selected] is
+  /// included as a state.
+  ///
+  /// If null, then [SystemMouseCursors.basic] is used when this checkbox is
+  /// disabled. When the checkbox is enabled, [SystemMouseCursors.click] is used
+  /// on Web, and [SystemMouseCursors.basic] is used on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+  ///    [WidgetStateProperty] which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
+  final MouseCursor? mouseCursor;
+
   /// The color to use when this checkbox is checked.
   ///
   /// If [fillColor] returns a non-null color in the [WidgetState.selected]
@@ -178,7 +213,7 @@ class CupertinoCheckbox extends StatefulWidget {
   ///   onChanged: (_){},
   ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.32);
+  ///       return Colors.orange.withValues(alpha: .32);
   ///     }
   ///     return Colors.orange;
   ///   })
@@ -200,7 +235,7 @@ class CupertinoCheckbox extends StatefulWidget {
   @Deprecated(
     'Use fillColor instead. '
     'fillColor now manages the background color in all states. '
-    'This feature was deprecated after v3.24.0-0.2.pre.'
+    'This feature was deprecated after v3.24.0-0.2.pre.',
   )
   final Color? inactiveColor;
 
@@ -263,6 +298,13 @@ class CupertinoCheckbox extends StatefulWidget {
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
 
+  /// The tap target and layout size of the checkbox.
+  ///
+  /// If this property is null, the tap target size defaults to a square of
+  /// [CupertinoCheckbox.width] pixels on desktop devices and
+  /// [kMinInteractiveDimensionCupertino] pixels on mobile devices.
+  final Size? tapTargetSize;
+
   /// The semantic label for the checkbox that will be announced by screen readers.
   ///
   /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
@@ -277,7 +319,8 @@ class CupertinoCheckbox extends StatefulWidget {
   State<CupertinoCheckbox> createState() => _CupertinoCheckboxState();
 }
 
-class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProviderStateMixin, ToggleableStateMixin {
+class _CupertinoCheckboxState extends State<CupertinoCheckbox>
+    with TickerProviderStateMixin, ToggleableStateMixin {
   final _CheckboxPainter _painter = _CheckboxPainter();
   bool? _previousValue;
 
@@ -328,7 +371,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
         return widget.checkColor ?? CupertinoDynamicColor.resolve(_kDisabledCheckColor, context);
-     }
+      }
       if (states.contains(WidgetState.selected)) {
         return widget.checkColor ?? CupertinoDynamicColor.resolve(_kDefaultCheckColor, context);
       }
@@ -338,8 +381,8 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
   WidgetStateProperty<BorderSide> get _defaultSide {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if ((states.contains(WidgetState.selected) || states.contains(WidgetState.focused))
-        && !states.contains(WidgetState.disabled)) {
+      if ((states.contains(WidgetState.selected) || states.contains(WidgetState.focused)) &&
+          !states.contains(WidgetState.disabled)) {
         return const BorderSide(width: 0.0, color: CupertinoColors.transparent);
       }
       if (states.contains(WidgetState.disabled)) {
@@ -370,30 +413,50 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     // throughout the lifecycle of this build method.
     final Set<WidgetState> currentStates = states;
 
-    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-        ?? _defaultFillColor.resolve(activeStates);
+    final Color effectiveActiveColor =
+        widget.fillColor?.resolve(activeStates) ?? _defaultFillColor.resolve(activeStates);
 
-    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-        ?? _defaultFillColor.resolve(inactiveStates);
+    final Color effectiveInactiveColor =
+        widget.fillColor?.resolve(inactiveStates) ?? _defaultFillColor.resolve(inactiveStates);
 
-    final BorderSide effectiveBorderSide = _resolveSide(widget.side, currentStates)
-      ?? _defaultSide.resolve(currentStates);
+    final BorderSide effectiveBorderSide =
+        _resolveSide(widget.side, currentStates) ?? _defaultSide.resolve(currentStates);
 
-    final Color effectiveFocusOverlayColor = widget.focusColor
-      ?? HSLColor
-          .fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
-          .withLightness(kCupertinoFocusColorBrightness)
-          .withSaturation(kCupertinoFocusColorSaturation)
-          .toColor();
+    final Color effectiveFocusOverlayColor =
+        widget.focusColor ??
+        HSLColor.fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
+            .withLightness(kCupertinoFocusColorBrightness)
+            .withSaturation(kCupertinoFocusColorSaturation)
+            .toColor();
+
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
+        WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+          return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+              (kIsWeb && !states.contains(WidgetState.disabled)
+                  ? SystemMouseCursors.click
+                  : SystemMouseCursors.basic);
+        });
+
+    final Size effectiveSize =
+        widget.tapTargetSize ??
+        switch (defaultTargetPlatform) {
+          TargetPlatform.iOS ||
+          TargetPlatform.android ||
+          TargetPlatform.fuchsia => const Size.square(kMinInteractiveDimensionCupertino),
+          TargetPlatform.macOS ||
+          TargetPlatform.linux ||
+          TargetPlatform.windows => const Size.square(CupertinoCheckbox.width),
+        };
 
     return Semantics(
       label: widget.semanticLabel,
       checked: widget.value ?? false,
       mixed: widget.tristate ? widget.value == null : null,
       child: buildToggleable(
+        mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        size: const Size.square(kMinInteractiveDimensionCupertino),
+        size: effectiveSize,
         painter: _painter
           ..position = position
           ..reaction = reaction
@@ -407,11 +470,11 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           ..value = value
           ..previousValue = _previousValue
           ..isActive = widget.onChanged != null
-          ..shape = widget.shape ?? RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.0),
-          )
+          ..shape =
+              widget.shape ??
+              const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)))
           ..side = effectiveBorderSide
-          ..brightness = CupertinoTheme.of(context).brightness
+          ..brightness = CupertinoTheme.of(context).brightness,
       ),
     );
   }
@@ -480,7 +543,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   Rect _outerRectAt(Offset origin) {
     const double size = CupertinoCheckbox.width;
-    final Rect rect = Rect.fromLTWH(origin.dx, origin.dy, size, size);
+    final rect = Rect.fromLTWH(origin.dx, origin.dy, size, size);
     return rect;
   }
 
@@ -501,18 +564,18 @@ class _CheckboxPainter extends ToggleablePainter {
 
   // Draw a gradient from the top to the bottom of the checkbox.
   void _drawFillGradient(Canvas canvas, Rect outer, Color topColor, Color bottomColor) {
-    final LinearGradient fillGradient = LinearGradient(
+    final fillGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
-      colors: <Color>[
-        topColor,
-        bottomColor,
-      ],
+      colors: <Color>[topColor, bottomColor],
     );
-    final Paint gradientPaint = Paint()
-      ..shader = fillGradient.createShader(outer);
-    canvas.drawPath(shape.getOuterPath(outer), gradientPaint);
+    final gradientPaint = Paint()..shader = fillGradient.createShader(outer);
+    if (shape.preferPaintInterior) {
+      shape.paintInterior(canvas, outer, gradientPaint);
+    } else {
+      canvas.drawPath(shape.getOuterPath(outer), gradientPaint);
+    }
   }
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool value) {
@@ -521,9 +584,15 @@ class _CheckboxPainter extends ToggleablePainter {
       _drawFillGradient(
         canvas,
         outer,
-        paint.color.withOpacity(isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0]),
-        paint.color.withOpacity(isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1]),
+        paint.color.withOpacity(
+          isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0],
+        ),
+        paint.color.withOpacity(
+          isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1],
+        ),
       );
+    } else if (shape.preferPaintInterior) {
+      shape.paintInterior(canvas, outer, paint);
     } else {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
@@ -533,13 +602,13 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   void _drawCheck(Canvas canvas, Offset origin, Paint paint) {
-    final Path path = Path();
+    final path = Path();
     // The ratios for the offsets below were found from looking at the checkbox
     // examples on in the HIG docs. The distance from the needed point to the
     // edge was measured, then divided by the total width.
-    const Offset start = Offset(CupertinoCheckbox.width * 0.22, CupertinoCheckbox.width * 0.54);
-    const Offset mid = Offset(CupertinoCheckbox.width * 0.40, CupertinoCheckbox.width * 0.75);
-    const Offset end = Offset(CupertinoCheckbox.width * 0.78, CupertinoCheckbox.width * 0.25);
+    const start = Offset(CupertinoCheckbox.width * 0.22, CupertinoCheckbox.width * 0.54);
+    const mid = Offset(CupertinoCheckbox.width * 0.40, CupertinoCheckbox.width * 0.75);
+    const end = Offset(CupertinoCheckbox.width * 0.78, CupertinoCheckbox.width * 0.25);
     path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
     path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
     path.moveTo(origin.dx + mid.dx, origin.dy + mid.dy);
@@ -550,17 +619,17 @@ class _CheckboxPainter extends ToggleablePainter {
   void _drawDash(Canvas canvas, Offset origin, Paint paint) {
     // From measuring the checkbox example in the HIG docs, the dash was found
     // to be half the total width, centered in the middle.
-    const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.5);
-    const Offset end = Offset(CupertinoCheckbox.width * 0.75, CupertinoCheckbox.width * 0.5);
+    const start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.5);
+    const end = Offset(CupertinoCheckbox.width * 0.75, CupertinoCheckbox.width * 0.5);
     canvas.drawLine(origin + start, origin + end, paint);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = size / 2.0 - const Size.square(CupertinoCheckbox.width) / 2.0 as Offset;
+    final origin = size / 2.0 - const Size.square(CupertinoCheckbox.width) / 2.0 as Offset;
     final Rect outer = _outerRectAt(origin);
-    final Paint paint = Paint()..color = _colorAt(value ?? true);
+    final paint = Paint()..color = _colorAt(value ?? true);
 
     switch (value) {
       case false:
@@ -574,15 +643,19 @@ class _CheckboxPainter extends ToggleablePainter {
     }
     // The checkbox's opacity changes when pressed.
     if (downPosition != null) {
-      final Paint pressedPaint = Paint()
+      final pressedPaint = Paint()
         ..color = brightness == Brightness.light
-          ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
-          : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
-      canvas.drawPath(shape.getOuterPath(outer), pressedPaint);
+            ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
+            : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
+      if (shape.preferPaintInterior) {
+        shape.paintInterior(canvas, outer, pressedPaint);
+      } else {
+        canvas.drawPath(shape.getOuterPath(outer), pressedPaint);
+      }
     }
     if (isFocused) {
       final Rect focusOuter = outer.inflate(1);
-      final Paint borderPaint = Paint()
+      final borderPaint = Paint()
         ..color = focusColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3.5;

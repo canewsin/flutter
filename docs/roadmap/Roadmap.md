@@ -1,79 +1,45 @@
-In the interest of transparency, we want to share high-level details of our roadmap, so that others can see our priorities and make plans based off the work we are doing.
+In the interest of transparency, we want to share high-level details of our roadmap so that others can see our priorities and make plans based on the work we are doing.
 
-Our plans will evolve over time based on customer feedback and new market opportunities. We use our quarterly surveys and feedback on GitHub issues to prioritize work. The list here shouldn't be viewed either as exhaustive, nor a promise that we will complete all this work. If you have feedback about what you think we should be working on, we encourage you to get in touch (e.g. by [filing an issue](https://github.com/flutter/flutter/issues/new/choose), or using the "thumbs-up" emoji reaction on an issue's first comment). Flutter is an open source project, we invite contributions both towards the themes presented below and in other areas.
+Our plans will evolve over time based on customer feedback and new market opportunities. We will use our surveys and feedback on GitHub issues to prioritize work. The list here shouldn't be viewed either as exhaustive nor a promise that we will complete all this work. If you have feedback about what you think we should work on, we encourage you to get in touch by [filing an issue](https://github.com/flutter/flutter/issues/new/choose), or using the "thumbs-up" emoji reaction on an issue's first comment. Because Flutter is an open source project, we invite contributions both towards the themes presented below and in other areas.
 
-_If you are a contributor or team of contributors with long-term plans for [contributing to Flutter](../../CONTRIBUTING.md), and would like your planned efforts reflected in the roadmap, please reach out to Hixie (ian@hixie.ch)._
+*If you are a contributor or team of contributors with long-term plans for [contributing to Flutter](../../CONTRIBUTING.md), and would like your planned efforts reflected in the roadmap, please reach via email to roadmap-input@flutter.dev.*
 
-# 2024
+# **2026**
 
-This roadmap is aspirational; it represents some of what our most active contributors to Flutter and Dart have told us they plan to work on this year. It is in general difficult to make any guarantees about engineering work, and it is all the more so for an open source project with hundreds of contributors.
+This roadmap is aspirational. It represents content primarily gathered from those of us who work on Flutter and Dart as employees of Google. By now non-Google contributors outnumber those employed by Google, so this is not an exhaustive list of all the new and exciting things that we hope will come this year\! As always it can be difficult to accurately forecast engineering work — even more so for an open source project. So please be mindful that what we cover here is a statement of intent and not a guarantee.
 
-## Core framework & engine
+## High-fidelity multiplatform: Impeller, Wasm, and beyond
 
-We continue to focus on quality and performance with Impeller.  We plan on completing the iOS migration to Impeller by removing the Skia backend on iOS. On Android we expect that Impeller will support Vulkan and OpenGLES; in the near term, we will also have an opt-out to use Skia instead. Additionally, we would like to improve Impeller testing infrastructure to reduce regressions in production.
+We will continue to deliver the best multiplatform stack by focusing on native-level quality and performance. Our 2026 goals include completing the migration to the [**Impeller**](https://docs.flutter.dev/perf/impeller) renderer on Android, and removing the legacy Skia backend on Android 10 and above. We continue to see Impeller as the best solution for fast startup and reduced jank. We are also committed to deep platform integration, ensuring day-zero support for [**Android 17**](https://developer.android.com/) and the upcoming iOS releases, alongside continued accessibility improvements for web, and multi-window desktop environments. For Desktop, our partners at Canonical continue to make progress on improving multi-window support. For Flutter on the web, we intend for [**WebAssembly (Wasm)**](https://webassembly.org/) to become the default to deliver native-quality experiences and performance. We are also collaborating with community-led frameworks like [Jaspr](https://jaspr.site/) for developers seeking a traditional, DOM-based approach to high-performance web-first applications and websites.
 
-For the core framework we expect to complete the effort to fully support Material 3. We're also investigating options to generalize the core framework to better support the adaptations needed to meet design expectations on Apple devices, such as app bars and tab bars.
+## **GenUI, ephemeral experiences and agentic apps**
 
-Work is also expected to continue on [blankcanvas](https://docs.google.com/document/d/1rS_RO2DQ_d4_roc3taAB6vXFjv7-9hJP7pyZ9NhPOdA/edit?resourcekey=0-VBzTPoqLwsruo0j9dokuOg).
+We will continue to explore the new paradigm of building application architecture to enable **dynamic and expressive UIs**—interfaces that adapt in real-time to user intent. This is powered by the [**Flutter GenUI SDK**](https://docs.flutter.dev/ai/genui) and the [**A2UI protocol**](https://a2ui.org/), enabling AI models to generate rich user experiences dynamically. To support this, we are investigating evolving the Dart language by adding support for interpreted bytecode in the Dart runtime. This enables "ephemeral" code delivery, where specific portions of an app can be loaded on demand.
 
-## Mobile (Android and iOS) platforms
+## **Full-Stack Dart: Bring your tooling everywhere**
 
-In 2023 we started an initiative to support multiple Flutter views — in 2024 our plan is to extend this support to Android and iOS. We're also working on improving the performance and test coverage/testability of platform views.
+We are broadening our stack to support the evolution towards full-stack and agentive apps. A major focus is **Dart Cloud Functions** for Firebase, providing ~10ms cold starts to ensure high-performance backend logic. We are also investigating Dart support for the **Google Cloud SDK** to enable you to easily connect and build your backend on Google Cloud. Additionally, we are working with the [Genkit](https://genkit.dev/) team on enabling Dart support, to help you build sophisticated AI features using Dart.
 
-We'll continue to modernize iOS offerings by enabling/supporting latest Apple standards, such as the [privacy manifests](https://github.com/flutter/flutter/issues/143232) and [Swift Package Manager](https://github.com/flutter/flutter/issues/33850). We'll also investigate needed support for future Android releases.
+## **AI-reimagined developer experience**
 
-On Android we'll look into supporting Kotlin in Android build files.
+AI coding agents are disrupting the way apps are built. To ensure high quality developer experience, we'll continue to collaborate within Google to ensure Dart and Flutter have top-tier support in [**Gemini CLI**](https://docs.flutter.dev/ai/create-with-ai#gemini-cli) and [**Antigravity**](https://docs.flutter.dev/ai/create-with-ai#antigravity), ensuring core workflows like stateful hot reload work seamlessly with AI agents. We are also investing in [**MCP (Model Context Protocol)** servers](https://docs.flutter.dev/ai/mcp-server) for Dart tooling, enabling AI agents to perform complex refactors and choose secure, performant libraries with high accuracy.
 
-Interop is important to interface with native code from Dart. We expect to complete the work to support [invoking Objective C](https://dart.dev/interop/objective-c-interop) code directly from Dart, and we'll investigate support to invoke Swift code directly. Likewise for Android, we'll continue work on the support to [call into Java and Android](https://dart.dev/interop/java-interop). We'll also look into better support for calling APIs that might only be invoked on the main OS/platform thread.
+## **Sustainable open-source & governance**
 
-We're seeing an increasing trend that larger Flutter apps often start as hybrid apps (an app that contains both Flutter code and some Android/iOS platform code/UI). We'll look into how we can better support this, both in terms of performance/overhead and developer ergonomics.
+To unlock Flutter's full potential, we are moving towards an open and sustainable operating model. This includes decoupling the [**Material**](https://m3.material.io/) and [**Cupertino**](https://developer.apple.com/design/human-interface-guidelines/components) design systems into standalone packages to accelerate development, and improving the extensibility of the Flutter Engine and command line tools so that support for new platforms can be authored "out-of-tree." We are also continuing to work with the open source community, customers, and partners to democratize architectural decisions and increase community contributions to the core framework.
 
-## Web platform
+In 2026, we are deepening our commitment to the ecosystem by formalizing how we collaborate with our most invested stakeholders. Central to this effort is the expansion of our **Consultancy Program**, **Google Developer Expert (GDE) network**, **Customer Advisory Board (CAB)**, and our **Partners Advisory Board (PAB)**, which provide direct feedback to our teams. By leveraging these avenues alongside our community programs, we aim to bridge the gap between developing Dart and Flutter and real-world applications built using them. These community programs will ensure that our roadmap is informed by diverse needs from our global audience of developers in various industries. These initiatives, combined with our desire for democratized architectural decisions, will not only increase visibility for community expertise but also foster a more resilient ecosystem for Flutter to continue to thrive.
 
-We'll continue to focus on performance and quality, including investigating reducing the overall application size, better use of multi-threading, supporting platform views, improving app load times, making CanvasKit the default renderer, improving text input, and investigating options for supporting [SEO for Flutter web](https://github.com/flutter/flutter/issues/46789).
+## **Modern syntax & compiled performance**
 
-We expect to complete the effort to compile Dart to WasmGC, and with that support [Wasm compilation of Flutter web apps](https://docs.flutter.dev/platform-integration/web/wasm). This also includes a [new JS interop](https://github.com/dart-lang/sdk/issues/35084) mechanism for Dart that supports both JS and Wasm compilation.
+Dart continues to evolve as a high-performance language for the client and server. In 2026, we plan to ship [**Primary Constructors**](https://github.com/dart-lang/language/issues/2364) to streamline class declarations and [**Augmentations**](https://github.com/dart-lang/language/issues/4154) to simplify code generation. We will continue to focus on improving `build_runner` as our main code generation tool. We are also improving **Dart/Wasm** compilation for modern browsers and refactoring the analyzer to improve performance for large-scale applications.
 
-We also plan to resume work to support [hot reload on the web](https://github.com/flutter/flutter/issues/53041).
+## **Bringing developers to Flutter and Dart**
 
-## Desktop platforms
+Our recently completed new [Dart and Flutter learning pathway](https://docs.flutter.dev/learn/pathway) provides a streamlined, guided onboarding path for new builders. In 2026, we plan to continue our outreach and community-driven efforts both in-person and across digital platforms like X, YouTube, our blog, and documentation to improve the experience for developers and their LLMs and coding tools when building high quality Dart and Flutter applications.
 
-While we expect the majority of our time to be spent on mobile and web platforms (as discussed above), we are still planning some advancements on desktop platforms:
+## **Predictable delivery**
 
-* We're hoping to make progress on supporting platform views [on macOS](https://github.com/flutter/flutter/issues/41722) and [Windows](https://github.com/flutter/flutter/issues/31713), and with that enable support for things like webview.
-* On Linux, our focus will be on GTK4 support and accessibility.
-* On all platforms we will continue our work on supporting multiple views from one Dart isolate, with the eventual goal of supporting multiple windows rendering from one widget tree.
-
-## Ecosystem
-
-We're planning on collaborating with AI frameworks to support a new era of AI powered Flutter apps.
-
-We are not planning on expanding the set of [flutter.dev plugins](https://pub.dev/publishers/flutter.dev/packages) we maintain, but will rather focus on raising the quality of the existing plugins, and resolving core feature gaps (for example, investigating an updated [shared_preferences](https://pub.dev/packages/shared_preferences) API that better supports use of isolates and to add-to-app use case). We'll also support community initiatives like [Flutter Favorites](https://pub.dev/packages?q=is%3Aflutter-favorite).
-
-We'll also continue to add support for building casual games with Flutter, as a joint effort with the [Flame](https://flame-engine.org/) community.
-
-## Tooling and AI
-
-We hope to integrate with AI solutions to offer AI assistance for core programming tasks.
-
-We'll also continue to collaborate with Google's [IDX team](https://developers.google.com/idx), and explore integration with design tools.
-
-## Programming language
-
-The Dart team expects to complete the assessment of the viability of supporting [macros](https://github.com/dart-lang/language/issues/1482) in Dart, and in 2024 either ship the first phases of supporting them, or if we discover unmitigable architectural issues, abandon the effort. Key use cases for macros include serialization/deserialization, data classes, and general extensibility.
-
-We'll investigate a number of more incremental language features, such as syntax changes to reduce verbosity (for example, [primary constructors](https://github.com/dart-lang/language/issues/2364) and [import syntax shorthand](https://github.com/dart-lang/language/issues/649)), and better support for statically checked variance.
-
-Finally, we'll look into re-use of Dart business logic in more places, and more pluggability/extensibility for Dart (for example, in DevTools and Analyzer).
-
-## Releases
-
-We plan to have four stable releases and 12 beta releases during 2024, similar to 2023.
-
-## Non-goals
-
-We're still not planning on investing in built-in support for [code push or hot updates](https://github.com/flutter/flutter/issues/14330). For code push, our friends at [shorebird.dev](https://shorebird.dev/) may have offerings of interest. For UI push (also known as server-driven UI), we recommend the [rfw](https://pub.dev/packages/rfw) package.
-
-***
+We plan a minimum of **four stable releases** for both Dart and Flutter and 12 beta releases in 2026. We are investing in further test automation to reduce release coordination failures and ensure that every release meets our high standards for stability and performance.
 
 _We maintain an [archive of roadmaps from previous years]([Archive]-Old-Roadmaps.md) in a separate page._

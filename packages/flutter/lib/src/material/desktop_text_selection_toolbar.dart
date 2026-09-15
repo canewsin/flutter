@@ -32,11 +32,8 @@ const double _kToolbarWidth = 222.0;
 ///    toolbar.
 class DesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates a const instance of DesktopTextSelectionToolbar.
-  const DesktopTextSelectionToolbar({
-    super.key,
-    required this.anchor,
-    required this.children,
-  }) : assert(children.length > 0);
+  const DesktopTextSelectionToolbar({super.key, required this.anchor, required this.children})
+    : assert(children.length > 0);
 
   /// {@template flutter.material.DesktopTextSelectionToolbar.anchor}
   /// The point where the toolbar will attempt to position itself as closely as
@@ -70,7 +67,7 @@ class DesktopTextSelectionToolbar extends StatelessWidget {
     assert(debugCheckHasMediaQuery(context));
 
     final double paddingAbove = MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;
-    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+    final localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -80,15 +77,10 @@ class DesktopTextSelectionToolbar extends StatelessWidget {
         _kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
-        delegate: DesktopTextSelectionToolbarLayoutDelegate(
-          anchor: anchor - localAdjustment,
-        ),
+        delegate: DesktopTextSelectionToolbarLayoutDelegate(anchor: anchor - localAdjustment),
         child: _defaultToolbarBuilder(
           context,
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: children,
-          ),
+          Column(mainAxisSize: MainAxisSize.min, children: children),
         ),
       ),
     );

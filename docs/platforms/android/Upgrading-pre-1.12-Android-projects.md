@@ -2,7 +2,7 @@ _If you `flutter create`d your project prior to version 1.12, this may apply to 
 
 # Background
 
-In order to better support the execution environments of adding Flutter to an existing project, the old Android platform-side wrappers hosting the Flutter runtime at [`io.flutter.app.FlutterActivity`](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/app/FlutterActivity.java) and their associated classes are now deprecated. New wrappers at [`io.flutter.embedding.android.FlutterActivity`](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java) and associated classes now replace them.
+In order to better support the execution environments of adding Flutter to an existing project, the old Android platform-side wrappers hosting the Flutter runtime at [`io.flutter.app.FlutterActivity`](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/app/FlutterActivity.java) and their associated classes are now deprecated. New wrappers at [`io.flutter.embedding.android.FlutterActivity`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java) and associated classes now replace them.
 
 Those classes better support real world scenarios where the FlutterActivity isn't the first and only Android Activity in an application.
 
@@ -20,7 +20,7 @@ _This guide assumes you haven't manually modified your Android host project for 
 
 If you opt to migrate your standard `flutter create`d project, follow the following steps:
 
-**1a.** If you don't have any of your own added code to `android/app/src/main/java/[your/package/name]/MainActivity.java`  - remove the body of your `MainActivity.java` and change the `FlutterActivity` import. The new `FlutterActivity` no longer requires manually registering your plugins. It will now perform the registration automatically when the underlaying `FlutterEngine` is created.
+**1a.** If you don't have any of your own added code to `android/app/src/main/java/[your/package/name]/MainActivity.java`  - remove the body of your `MainActivity.java` and change the `FlutterActivity` import. The new `FlutterActivity` no longer requires manually registering your plugins. It will now perform the registration automatically when the underlying `FlutterEngine` is created.
 
   ```diff
   // MainActivity.java

@@ -13,16 +13,19 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [Card] widgets.
 ///
-/// Descendant widgets obtain the current [CardTheme] object using
-/// `CardTheme.of(context)`. Instances of [CardTheme] can be
-/// customized with [CardTheme.copyWith].
+/// Descendant widgets obtain the current [CardThemeData] object using
+/// [CardTheme.of]. Instances of [CardThemeData] can be
+/// customized with [CardThemeData.copyWith].
 ///
-/// Typically a [CardTheme] is specified as part of the overall [Theme]
+/// Typically a [CardThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.cardTheme].
 ///
-/// All [CardTheme] properties are `null` by default. When null, the [Card]
+/// All [CardThemeData] properties are `null` by default. When null, the [Card]
 /// will use the values from [ThemeData] if they exist, otherwise it will
 /// provide its own defaults.
 ///
@@ -31,7 +34,6 @@ import 'theme.dart';
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 class CardTheme extends InheritedWidget with Diagnosticable {
-
   /// Creates a theme that can be used for [ThemeData.cardTheme].
   ///
   /// The [elevation] must be null or non-negative.
@@ -47,24 +49,26 @@ class CardTheme extends InheritedWidget with Diagnosticable {
     CardThemeData? data,
     Widget? child,
   }) : assert(
-        data == null ||
-        (clipBehavior ??
-        color ??
-        surfaceTintColor ??
-        shadowColor ??
-        elevation ??
-        margin ??
-        shape) == null),
-      assert(elevation == null || elevation >= 0.0),
-      _data = data,
-      _clipBehavior = clipBehavior,
-      _color = color,
-      _surfaceTintColor = surfaceTintColor,
-      _shadowColor = shadowColor,
-      _elevation = elevation,
-      _margin = margin,
-      _shape = shape,
-      super(child: child ?? const SizedBox());
+         data == null ||
+             (clipBehavior ??
+                     color ??
+                     surfaceTintColor ??
+                     shadowColor ??
+                     elevation ??
+                     margin ??
+                     shape) ==
+                 null,
+       ),
+       assert(elevation == null || elevation >= 0.0),
+       _data = data,
+       _clipBehavior = clipBehavior,
+       _color = color,
+       _surfaceTintColor = surfaceTintColor,
+       _shadowColor = shadowColor,
+       _elevation = elevation,
+       _margin = margin,
+       _shape = shape,
+       super(child: child ?? const SizedBox());
 
   final CardThemeData? _data;
   final Clip? _clipBehavior;
@@ -119,15 +123,16 @@ class CardTheme extends InheritedWidget with Diagnosticable {
 
   /// The properties used for all descendant [Card] widgets.
   CardThemeData get data {
-    return _data ?? CardThemeData(
-      clipBehavior: _clipBehavior,
-      color: _color,
-      surfaceTintColor: _surfaceTintColor,
-      shadowColor: _shadowColor,
-      elevation: _elevation,
-      margin: _margin,
-      shape: _shape,
-    );
+    return _data ??
+        CardThemeData(
+          clipBehavior: _clipBehavior,
+          color: _color,
+          surfaceTintColor: _surfaceTintColor,
+          shadowColor: _shadowColor,
+          elevation: _elevation,
+          margin: _margin,
+          shape: _shape,
+        );
   }
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -155,10 +160,18 @@ class CardTheme extends InheritedWidget with Diagnosticable {
     );
   }
 
-  /// The [ThemeData.cardTheme] property of the ambient [Theme].
-  static CardTheme of(BuildContext context) {
+  /// Returns the configuration [data] from the closest [CardTheme] ancestor.
+  ///
+  /// If there is no ancestor, it returns [ThemeData.cardTheme].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// CardThemeData theme = CardTheme.of(context);
+  /// ```
+  static CardThemeData of(BuildContext context) {
     final CardTheme? cardTheme = context.dependOnInheritedWidgetOfExactType<CardTheme>();
-    return cardTheme ?? Theme.of(context).cardTheme;
+    return cardTheme?.data ?? Theme.of(context).cardTheme;
   }
 
   @override
@@ -292,15 +305,8 @@ class CardThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
-    clipBehavior,
-    color,
-    shadowColor,
-    surfaceTintColor,
-    elevation,
-    margin,
-    shape,
-  );
+  int get hashCode =>
+      Object.hash(clipBehavior, color, shadowColor, surfaceTintColor, elevation, margin, shape);
 
   @override
   bool operator ==(Object other) {
@@ -310,14 +316,14 @@ class CardThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is CardThemeData
-      && other.clipBehavior == clipBehavior
-      && other.color == color
-      && other.shadowColor == shadowColor
-      && other.surfaceTintColor == surfaceTintColor
-      && other.elevation == elevation
-      && other.margin == margin
-      && other.shape == shape;
+    return other is CardThemeData &&
+        other.clipBehavior == clipBehavior &&
+        other.color == color &&
+        other.shadowColor == shadowColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.elevation == elevation &&
+        other.margin == margin &&
+        other.shape == shape;
   }
 
   @override

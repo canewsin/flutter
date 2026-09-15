@@ -23,9 +23,7 @@ import 'package:flutter/rendering.dart';
 ///     the mobile text selection toolbars.
 class DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   /// Creates an instance of TextSelectionToolbarLayoutDelegate.
-  DesktopTextSelectionToolbarLayoutDelegate({
-    required this.anchor,
-  });
+  DesktopTextSelectionToolbarLayoutDelegate({required this.anchor});
 
   /// The point at which to render the menu, if possible.
   ///
@@ -39,7 +37,7 @@ class DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegat
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final Offset overhang = Offset(
+    final overhang = Offset(
       anchor.dx + childSize.width - size.width,
       anchor.dy + childSize.height - size.height,
     );

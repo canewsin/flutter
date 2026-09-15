@@ -17,13 +17,14 @@ project (the framework itself and all our sample code). Flutter application deve
 are welcome to follow this style as well, but this is by no means required. Flutter
 will work regardless of what style is used to author applications that use it.
 
-The engine repository uses [other style guides for non-Dart code](https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#style). The language-neutral sections in this document still apply to engine code, however.
+Code under the `engine` subdirectory uses [other style guides for non-Dart code](../../engine/src/flutter/CONTRIBUTING.md#style).
+The language-neutral sections in this document still apply to engine code, however.
 
 
 ## Overview
 
 This document describes our approach to designing and programming Flutter,
-from high-level architectural principles all the way to indentation rules.
+from high-level architectural principles all the way to naming rules.
 These are our norms, written down so that we can easily convey our shared
 understanding with new team members.
 
@@ -39,8 +40,7 @@ For anything not covered by this document, check the
 for more advice. That document is focused primarily on Dart-specific
 conventions, while this document is more about Flutter conventions.
 
-In some cases (for example, line wrapping around `if` statements) the
-Dart style guide differs from the Flutter guide. For Flutter project code,
+In some cases the Dart style guide differs from the Flutter guide. For Flutter project code,
 the Flutter guide governs. The differences are a result of slightly different
 priorities. The Flutter guide is designed for making code highly readable
 even to people who have never seen the code before and are new to Dart, as
@@ -48,9 +48,6 @@ the Flutter framework code will be read millions of times more than it is writte
 The Dart guide, on the other hand, is designed to provide a more balanced approach
 that assumes that the writing of the code will be a bigger proportion of the
 interactions with the code, and that the reader is more experienced with Dart.
-(The `dart format` tool uses the Dart guide, so we do not use it in the
-flutter/flutter and flutter/engine repositories. However, we do recommend its
-use in general.)
 
 ### A word on designing APIs
 
@@ -291,9 +288,8 @@ by real developers.
 
 ### Get early feedback when designing new APIs
 
-If you're designing a new API or a new feature, consider [writing a design doc](Design-Documents.md).
-Then, get feedback from the relevant people, e.g. send it to `flutter-dev` or
-post it on the [relevant chat channel](Chat.md#existing-channels).
+If you're designing a new API or a new feature, consider [writing an RFC or design doc](Design-Documents.md).
+Then, get feedback from the relevant people, e.g. post it on the [relevant chat channel](Chat.md#existing-channels).
 
 
 ### Start designing APIs from the closest point to the developer
@@ -365,7 +361,12 @@ widget for that rather than updating the existing buttons to have the new style.
 
 All code in all Flutter repositories must be contributed by developers who have signed [the Google CLA](https://cla.developers.google.com/), and must be licensed using our normal BSD license with a copyright referencing "The Flutter Authors", except if it is "third party code".
 
-"Third party code" that is not part of a Dart package must be in a subdirectory of a `third_party` directory at the root of the relevant repository, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code.
+"Third party code" that is not part of a Dart package must be in a subdirectory of a `third_party` directory located:
+
+* [/third_party](../../third_party) for the Flutter Framework
+* [/engine/src/flutter/third_party](../../engine/src/flutter/third_party) for the Flutter Engine.
+
+The subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code.
 
 "Third party code" that is part of a Dart package and is not Dart code must be in a subdirectory of a `third_party` directory at the root of the package, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the [LicenseRegistry](https://master-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html) API docs.
 
@@ -375,8 +376,7 @@ All licenses included in this manner must have been reviewed and determined to b
 
 All such "third party code" must either be a fork for which we take full responsibility, or there must be an automated rolling mechanism that keeps the code up to date when the upstream source changes.
 
-In general it is _strongly_ recommended that we avoid any such code unless strictly necessary. In particular, we aim for all code in the flutter/flutter repository to be [single-licensed](../about/Why-we-have-a-separate-engine-repo.md#licensing), which is why it does not contain any "third party code" at all.
-
+In general it is _strongly_ recommended that we avoid any such code unless strictly necessary. In particular, we aim for all _Flutter Framework_ code in the flutter/flutter repository to be single-licensed.
 
 ## Documentation (dartdocs, javadocs, etc)
 
@@ -405,23 +405,14 @@ be documented (typically on the wiki), code should be self-explanatory
 or commented, and conventions should be written down, e.g. in our style
 guide.
 
-There is one exception: it's better to _not_ document something in our API
-docs than to document it poorly. This is because if you don't document it,
-it still appears on our list of things to document. Feel free to remove
-documentation that violates our rules below (especially the next one),
-so as to make it reappear on the list.
-
 
 ### Avoid useless documentation
 
 If someone could have written the same documentation without knowing
-anything about the class other than its name, then it's useless.
+anything about the class other than its name, then it's useless. Avoid checking
+in such documentation.
 
-Avoid checking in such documentation, because it is no better than no
-documentation but will prevent us from noticing that the identifier is
-not actually documented.
-
-Example (from [`CircleAvatar`](http://docs.flutter.io/flutter/material/CircleAvatar-class.html)):
+Example (from [`CircleAvatar`](https://api.flutter.dev/flutter/material/CircleAvatar-class.html)):
 
 ```dart
 // BAD:
@@ -477,7 +468,7 @@ Unfortunately, the reality is that everyone starts knowing nothing, and we do no
 
 For this reason, avoid using terms without first defining them, unless you are linking to more fundamental documentation that defines that term without reference to the API you are documenting.
 
-For example, a fancy widget in the Material library can refer to the `StatefulWidget` documentation and assume that the reader either knows about the `StatefulWidget` class, or can learn about it by following the link and then later returning to the documentation for the fancy widget. However, the documentation for the `StatefulWidget` class should avoid assuming that the reader knows what a `State` class is, and should avoid defering to it for its definition, because `State` could is likely to defer back to `StatefulWidget` and the reader would be stuck in a loop unable to grasp the basic principles. This is the documentation equivalent of a bootstrapping problem.
+For example, a fancy widget in the Material library can refer to the `StatefulWidget` documentation and assume that the reader either knows about the `StatefulWidget` class, or can learn about it by following the link and then later returning to the documentation for the fancy widget. However, the documentation for the `StatefulWidget` class should avoid assuming that the reader knows what a `State` class is, and should avoid deferring to it for its definition, because `State` could is likely to defer back to `StatefulWidget` and the reader would be stuck in a loop unable to grasp the basic principles. This is the documentation equivalent of a bootstrapping problem.
 
 Another way to express this is that API documentation should follow a similar layering philosophy as code. The goal of documentation is not just to act as a refresher for experts, but to act as a tutorial for new developers.
 
@@ -605,13 +596,13 @@ By definition, if they are looking at the documentation, they are not finding it
 
 Sample code helps developers learn your API quickly. Writing sample code also helps you think through how your API is going to be used by app developers.
 
-Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under [the API examples directory](https://github.com/flutter/flutter/blob/main/examples/api). This will then be checked by automated tools, and formatted for display on the API documentation web site [api.flutter.dev](https://api.flutter.dev). For details on how to write sample code, see [the API example documentation](https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring).
+Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under [the API examples directory](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api). This will then be checked by automated tools, and formatted for display on the API documentation web site [api.flutter.dev](https://api.flutter.dev). For details on how to write sample code, see [the API example documentation](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api/README.md#authoring).
 
 #### Provide full application samples.
 
 Our UX research has shown that developers prefer to see examples that are in the context of an entire app. So, whenever it makes sense, provide an example that can be presented as part of an entire application instead of just a snippet that uses the `{@tool snippet}` or &#96;&#96;&#96;dart ... &#96;&#96;&#96; indicators.
 
-An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See [here](https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring) for more details about writing these kinds of examples.
+An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See [here](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api/README.md#authoring) for more details about writing these kinds of examples.
 
 Dartpad examples (those using the dartdoc `{@tool dartpad}` indicator) will be presented on the [API documentation website](https://api.flutter.dev) as an in-page executable and editable example. This allows developers to interact with the example right there on the page, and is the preferred form of example. Here is [one such example](https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html#widgets.AnimatedSwitcher.1).
 
@@ -715,12 +706,12 @@ When referencing a parameter, use backticks. However, when referencing a paramet
 ```dart
 // GOOD
 
-  /// Creates a foobar, which allows a baz to quux the bar.
+  /// Creates a foobar.
   ///
-  /// The [bar] argument must not be null.
+  /// The [bar] argument allows the baz to quux.
   ///
   /// The `baz` argument must be greater than zero.
-  Foo({ this.bar, int baz }) : assert(bar != null), assert(baz > 0);
+  Foo({required this.bar, required int baz}) : assert(baz > 0);
 ```
 
 Avoid using terms like "above" or "below" to reference one dartdoc section from another. Dartdoc sections are often shown alone on a Web page, the full context of the class is not present.
@@ -803,22 +794,23 @@ Use `switch` with no `default` case if you are examining an enum, since the anal
 Avoid using `if` chains, `? ... : ...`, or, in general, any expressions involving enums.
 
 
-### Avoid using `var` and `dynamic`
+### Prefer explicit types and avoid `dynamic`
 
-All variables and arguments are typed; avoid `dynamic` or `Object` in
-any case where you could figure out the actual type. Always specialize
-generic types where possible. Explicitly type all list and map
-literals. Give types to all parameters, even in closures and even if you
-don't use the parameter.
+Avoid `dynamic` or `Object` in any case where you could figure out the
+actual type. Always specialize generic types where possible. Explicitly
+type all list and map literals. Give types to all parameters, even in
+closures and even if you don't use the parameter.
 
-This achieves two purposes: it verifies that the type that the compiler
-would infer matches the type you expect, and it makes the code self-documenting
-in the case where the type is not obvious (e.g. when calling anything other
-than a constructor).
+For local variables, follow the `omit_obvious_local_variable_types` and
+`specify_nonobvious_local_variable_types` lints — omit the type annotation
+when the type is obvious from context (e.g. constructor calls), and
+specify it when it is not.
 
-Always avoid `var` and `dynamic`. If the type is unknown, prefer using
-`Object` (or `Object?`) and casting, as using `dynamic` disables all
-static checking.
+This makes the code self-documenting in the case where the type is not
+obvious (e.g. when calling anything other than a constructor).
+
+Avoid `dynamic`. If the type is unknown, prefer using `Object` (or
+`Object?`) and casting, as using `dynamic` disables all static checking.
 
 
 ### Avoid using `library` and `part of`.
@@ -831,21 +823,27 @@ really is, and tends to encourage "spaghetti" code (where distant components ref
 than "lasagna" code (where each section of the code is cleanly layered and separable).
 
 
-### Avoid using `extension`.
+### Guidelines for `extension`s.
 
-Extension methods are confusing to document and discover. To an end developer,
-they appear no different than the built in API of the class, and discovering
-the documentation and implementation of an extension is more challenging than
-for class members.
+[Extension methods][] let you add additional functionality to an existing type.
+When choosing between declaring a regular instance method and an extension
+method, consider the trade-offs. Extension methods are resolved statically and
+cannot be overridden. Furthermore, misusing extension methods can pollute IDE
+suggestions and cause naming collisions.
 
-Prefer instead adding methods directly to relevant classes. If that is not
-possible, create a method that clearly identifies what object(s) it works with
-and is part of.
+Don't declare an extension method when declaring a regular method will do.
 
-(A rare exception can be made for extensions that provide temporary workarounds
-when deprecating features. In those cases, however, the extensions and all their
-members must be deprecated in the PR that adds them, and they must be removed
-in accordance with our deprecation policy.)
+Don't use extension methods if the end developer might want to override the
+extension method's implementation. Extension methods cannot be overridden.
+
+Don't create extension methods with the same name on the same type in separate
+Flutter libraries. This causes collisions if both libraries are imported.
+
+Avoid creating public extension methods on common types from the Dart SDK like
+`Object`, `List`, `Map`, `Future`, etc. This should be done with extreme care to
+avoid polluting the suggestions end developers see in IDEs.
+
+[Extension methods]: https://dart.dev/language/extension-methods
 
 
 ### Avoid using `FutureOr<T>`
@@ -927,7 +925,6 @@ the following pattern:
 TheType get theProperty => _theProperty;
 TheType _theProperty;
 void set theProperty(TheType value) {
-  assert(value != null);
   if (_theProperty == value) {
     return;
   }
@@ -1030,6 +1027,398 @@ anyway. It should also be avoided in very large functions.
 It incurs runtime overhead in maintaining and using an iterator, and space overhead for the compiler
 to actually desugar the generator into something that uses an iterator class.
 
+### Use dot shorthands to reduce redundant information
+
+1. [Always omit a local variable's obvious type over using dot shorthands](#always-omit-a-local-variables-obvious-type-over-using-dot-shorthands).
+2. [Prefer using dot shorthands to initialize top-level variables and fields](#prefer-using-dot-shorthands-to-initialize-top-level-variables-and-fields).
+3. [Consider using dot shorthand to omit obvious types when assigning to an existing variable, field, or setter](#consider-using-dot-shorthands-to-omit-obvious-types-when-assigning-to-an-existing-variable-field-or-setter).
+4. [Prefer using dot shorthands to omit obvious types for named argument values](#prefer-using-dot-shorthands-to-omit-obvious-types-for-named-argument-values).
+5. [Don't use dot shorthands for positional argument values](#dont-use-dot-shorthands-for-positional-argument-values).
+6. [Prefer using dot shorthands for implicit returns](#prefer-using-dot-shorthands-for-implicit-returns).
+7. [Prefer using explicit types for explicit returns](#prefer-using-explicit-types-for-explicit-returns).
+8. [Prefer using dot shorthands to omit obvious types for the default values of constructors' initializing formals](#prefer-using-dot-shorthands-to-omit-obvious-types-for-default-values-of-constructors-initializing-formals).
+9. [Prefer using dot shorthands for switch cases to omit obvious types](#prefer-using-dot-shorthands-for-switch-cases-to-omit-obvious-types).
+10. [Prefer using dot shorthands in collection literals if the collection's element type is obvious](#prefer-using-dot-shorthands-in-collection-literals-if-the-collections-element-type-is-obvious).
+
+
+#### Always omit a local variable's obvious type over using dot shorthands
+
+When declaring a variable, decide whether you want to infer the variable's type or not *first*,
+and then based on that, decide if you're still able to use a dot shorthand for the initializer.
+In other words, the rule to omit a variable's obvious type has higher precedence than the rule
+to use dot shorthands.
+
+```dart
+void foo() {
+  // ✅ Good. The expression SliverAppBar is obviously typed,
+  // so the local variable's type should be omitted.
+  var appBar = SliverAppBar('Hello');
+
+  // ❌ BAD: Infer the local variable's type instead of using dot shorthands.
+  SliverAppBar appBar = .new();
+
+  // ❌ BAD: The type of an enum value isn't obviously typed.
+  // The expression "Foo.bar" might be an enum value, or it might be a static getter that returns any type.
+  // The local variable's declaration should not use type inference.
+  var alignment = MainAxisAlignment.start;
+
+  // ✅ Good. Use explicit types for a local variable declaration if the expression is not obviously typed.
+  // You can use dot shorthands to initialize an explicitly typed local variable.
+  MainAxisAlignment alignment = .start;
+}
+```
+
+
+#### Prefer using dot shorthands to initialize top-level variables and fields
+
+Top-level variables and fields must have explicit types, so top-level variables and fields can
+use dot shorthands to initialize their values.
+
+```dart
+// ✅ Good. Uses dot shorthands to initialize top-level variables.
+const MainAxisAlignment kGlobalAlignment = .start;
+const SliverAppBar kGlobalAppBar = .new();
+
+// ⚠️ OK but verbose. Consider using dot shorthands.
+const MainAxisAlignment kGlobalAlignment = MainAxisAlignment.start;
+const SliverAppBar kGlobalAppBar = SliverAppBar();
+
+// ❌ BAD. Always use explicit types for public APIs.
+const kGlobalAppBar = SliverAppBar();
+
+class Foo {
+  // ✅ Good. Uses dot shorthands to initialize public APIs.
+  final MainAxisAlignment defaultAlignment = .start;
+  final MainAxisAlignment _privateAlignment = .start;
+  final SliverAppBar defaultAppBar = .new();
+
+  // ⚠️ OK but verbose. Consider using dot shorthands.
+  final MainAxisAlignment defaultAlignment = MainAxisAlignment.start;
+  final MainAxisAlignment _privateAlignment = MainAxisAlignment.start;
+  final SliverAppBar defaultAppBar = SliverAppBar();
+
+  // ❌ BAD. Always use explicit types for public APIs.
+  final defaultAppBar = SliverAppBar();
+}
+```
+
+
+#### Consider using dot shorthands to omit obvious types when assigning to an existing variable, field, or setter
+
+```dart
+void foo() {
+  MainAxisAlignment mainAxisAlignment = ...;
+  SliverAppBar sliverAppBar = ...;
+  MutableConfig config = ...;
+
+  // ✅ Good. Uses dot shorthands to assign to an existing local variable.
+  mainAxisAlignment = .start;
+  sliverAppBar = .new();
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  mainAxisAlignment = MainAxisAlignment.start;
+  sliverAppBar = SliverAppBar();
+
+  // ❌ BAD. Use explicit types if the type is not obvious from the name.
+  // Or, consider renaming 'fu' to make the type obvious.
+  fu = .new('Hello');
+
+  // ✅ Good. Uses dot shorthands to assign to an existing field or setter.
+  config.mainAxisAlignment = .start;
+  config.sliverAppBar = .new();
+
+  // ⚠️ OK but the type of config.text is less obvious: config.text might be
+  // a String, Widget, etc. If a reviewer deems this non-obvious, they can
+  // request an explicit type.
+  config.text = .new('Hello');
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  config.mainAxisAlignment = MainAxisAlignment.start;
+  config.sliverAppBar = SliverAppBar();
+
+  // ❌ BAD. Use explicit types if the type is not obvious from the name.
+  config.fu = .new('Hello');
+}
+```
+
+
+#### Prefer using dot shorthands to omit obvious types for named argument values
+
+```dart
+// ✅ Good. Uses dot shorthands for named argument values
+// to omit types that are obvious.
+Row(
+  mainAxisAlignment: .start,
+  crossAxisAlignment: .start,
+  children: children,
+),
+
+// ❌ BAD. Use dot shorthands to omit types that are obvious
+// from the named argument.
+Row(
+  mainAxisAlignment: MainAxisAlignment.start,
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: children,
+),
+
+// ✅ Good. Uses dot shorthands for named argument values
+// to omit types that are obvious.
+Text('Hello world', textScaler: .new()),
+
+// ⚠️ OK but consider using dot shorthands.
+Text('Hello world', textScaler: TextScaler()),
+```
+
+A special case is the `EdgeInsetsGeometry` type: it is considered obvious for named arguments like "padding":
+
+```dart
+// ✅ Good. Use dot shorthands for named argument values
+// to omit types that are obvious. EdgeInsetsGeometry is obvious
+// for a named arguments like "padding".
+Padding(
+  padding: .all(8.0),
+  child: child,
+),
+
+// ✅ Good.
+Chip(
+  label: Text('Hello'),
+  labelPadding: .all(8.0),
+),
+
+// ❌ BAD. Use dot shorthands to omit types that are obvious
+// from the named argument.
+Padding(
+  padding: EdgeInsets.all(8.0),
+  child: child,
+),
+
+// ❌ BAD.
+Chip(
+  label: Text('Hello'),
+  labelPadding: EdgeInsets.all(8.0),
+),
+```
+
+
+#### Don't use dot shorthands for positional argument values.
+
+```dart
+// ❌ BAD. Uses dot shorthands for positional argument values.
+// What's the type of .zero?
+Curve2DSample(0.5, .zero)
+
+// ❌ BAD. Uses dot shorthands for positional argument values.
+// What's the type of .new?
+decodeImageFromList(.new(1024)),
+
+// ✅ Good.
+Curve2DSample(0.5, Offset.zero)
+
+// ✅ Good.
+decodeImageFromList(Uint8List(1024)),
+```
+
+
+#### Prefer using dot shorthands for implicit returns
+
+```dart
+// ✅ Good. Uses dot shorthands for implicit returns.
+MainAxisAlignment pickAlignment() => .start;
+Text createText() => .new('Hello');
+
+// ⚠️ OK but repetitive. Consider using dot shorthands.
+MainAxisAlignment pickAlignment() => MainAxisAlignment.start;
+Text createText() => Text('Hello');
+
+// ❌ BAD. Avoid implicit returns for complex expressions.
+Text createText() => doThing((ThingEnum thing) => switch (thing) {
+  .thing1 => .new('Hello'),
+  .thing2 => .new('World'),
+});
+```
+
+
+#### Prefer using explicit types for explicit returns
+
+```dart
+// ✅ Good. Uses explicit types for explicit returns.
+MainAxisAlignment pickAlignment() {
+  return MainAxisAlignment.start;
+}
+
+// ✅ Good. Uses dot explicit types for explicit returns.
+Text createText() {
+  return Text('Hello');
+}
+
+// ⚠️ OK but consider using explicit types, especially if
+// this method is multiple lines.
+MainAxisAlignment pickAlignment() {
+  return .start;
+}
+
+// ⚠️ OK but consider using explicit types, especially if
+// this method is multiple lines.
+Text createText() {
+  return .new('Hello');
+}
+```
+
+
+#### Prefer using dot shorthands to omit obvious types for default values of constructors' initializing formals
+
+```dart
+class Foo {
+  final MainAxisAlignment mainAxisAlignment;
+
+  // ✅ Good. Uses dot shorthands for the default value.
+  Foo({this.mainAxisAlignment = .start});
+  Foo([this.mainAxisAlignment = .start]);
+
+  // ⚠️ OK but verbose. Consider using dot shorthands.
+  Foo({this.mainAxisAlignment = MainAxisAlignment.start});
+  Foo([this.mainAxisAlignment = MainAxisAlignment.start]);
+}
+```
+
+
+#### Prefer using dot shorthands for switch cases to omit obvious types
+
+```dart
+void foo() {
+  // ✅ Good. Uses dot shorthands in switch cases.
+  MainAxisAlignment alignment = .spaceBetween;
+  _ = switch (alignment) {
+    .spaceBetween => true,
+    _ => false,
+  };
+
+  // ❌ BAD. Use dot shorthands to omit obvious types.
+  MainAxisAlignment alignment = .spaceBetween;
+  _ = switch (alignment) {
+    MainAxisAlignment.spaceBetween => true,
+    _ => false,
+  };
+
+  // ❌ BAD. Use explicit types if the type is not obvious.
+  // Consider renaming "whatIsThis" to make the type obvious.
+  _ = switch (whatIsThis()) {
+    .mystery => true,
+    _ => false,
+  };
+
+  // ✅ Good. Uses explicit types if the type is not obvious.
+  _ = switch (whatIsThis()) {
+    BookGenre.mystery => true,
+    _ => false,
+  };
+}
+```
+
+
+#### Prefer using dot shorthands in collection literals if the collection's element type is obvious
+
+```dart
+void foo() {
+  // ✅ Good. Uses dot shorthands in a collection literal whose type is obvious.
+  var alignments = <MainAxisAlignment>[.start, .end];
+  var objects = <AwesomeObject>[.new('Foo'), .new('Bar'), .new('Buzz')];
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  var objects = <AwesomeObject>[AwesomeObject('Foo'), AwesomeObject('Bar'), AwesomeObject('Buzz')];
+
+  // ❌ BAD. Per Flutter's existing style guide, all list and map literals must
+  // be explicitly typed.
+  var alignments = [MainAxisAlignment.start, MainAxisAlignment.end];
+
+  // ❌ BAD. Per Flutter's existing omit_obvious_local_variable_types lint,
+  // a local variable's type is not obvious if the elements don't all have the
+  // same type.
+  var objects = [DifferentObject('Foo'), AwesomeObject('Bar')];
+
+  // ✅ Good. Uses dot shorthands in a collection literal whose type is obvious.
+  var objects = <BaseObject>[DifferentObject('Foo'), AwesomeObject('Bar')];
+}
+```
+
+
+### Use private named parameters as initializing formals
+
+Prefer using private named parameters as initializing formals when initializing private fields.
+
+```dart
+// GOOD
+class Point {
+  Point({required this._x});
+  final double _x;
+}
+
+// BAD
+class Point {
+  Point({required double x}) : _x = x;
+  final double _x;
+}
+```
+
+
+### Do not use primary constructors in framework widgets
+
+Do not use primary constructors to implement Flutter framework widgets.
+
+While primary constructors reduce boilerplate for simple classes, they scale poorly to complex
+framework widgets with many fields, assertions, and documentation comments.
+
+Primary constructors are permitted in non-widget framework helper classes (e.g., `_TableElementRow`),
+templates, code samples, and documentation. Even for non-widget classes, prefer standard constructors
+if parameters require extensive documentation or complex assertions. App developers are encouraged to
+use primary constructors for their own widgets.
+
+```dart
+// GOOD
+class BookingHeader extends StatelessWidget {
+  const BookingHeader({
+    super.key,
+    required this.booking,
+  });
+  final Booking booking;
+}
+
+// BAD (Framework widgets should not use primary header constructors)
+class const BookingHeader({
+  super.key,
+  required final Booking booking,
+}) extends StatelessWidget {}
+```
+
+
+### Do not use the new in-body constructor syntax
+
+Avoid using the new in-body constructor syntax (`new() {}`, `new name() {}`) introduced in
+Dart 3.13. This syntax is prohibited in the Flutter framework style guide until May 2027 to ensure
+backward compatibility and protect developers on older SDKs.
+
+```dart
+// GOOD
+class LongClassName {
+  LongClassName() {}
+  LongClassName.name() {}
+  const LongClassName();
+  const LongClassName.name();
+  factory LongClassName() = D;
+}
+
+// BAD (Prohibited until May 2027)
+class LongClassName {
+  new() {}
+  new name() {}
+  const new();
+  const new name();
+  factory() = D;
+}
+```
+
+
 ## Writing tests
 
 ### Make each test entirely self-contained
@@ -1037,11 +1426,11 @@ to actually desugar the generator into something that uses an iterator class.
 Embrace code duplication in tests. It makes it easier to make new tests by copying and pasting them and
 tweaking a few things.
 
-Avoid using `setUp`, `tearDown`, and similar features, as well as test-global variables or other state
-shared between tests. They make writing tests easier but make maintaining them, debugging them, and
-refactoring code much harder. (These are commonly used in Flutter's codebase today, but that is almost
-always a mistake. When you are editing a file that uses those features, aim to reduce the number of
-tests using them while you're there.)
+Avoid test-global variables or state shared between tests; these make maintaining, debugging, and refactoring
+significantly harder. Instead of `setUp`, use local helper functions called within each test block to
+initialize state. To handle cleanup, prefer `addTearDown` over the global `tearDown` callback. `addTearDown`
+allows you to register cleanup logic at the exact point where a resource is created, ensuring it only runs
+if the initialization was successful.
 
 Specifically, we are trying to avoid shared state, which could persist across tests, and non-local
 side-effects, which would prevent being able to move a test to another file without breaking the test.
@@ -1051,17 +1440,27 @@ have side-effects that might change how other tests run.)
 
 ### Prefer more test files, avoid long test files
 
-Avoid adding tests to files that already have more than one or two hundred lines of code. It's easier
+Organize tests into smaller files grouped by feature, widget, or behavior. It's easier
 to understand a test file when it has only a few related tests, rather than when it has an entire test
 suite. (It also makes developing the tests faster because you can run the test file faster.)
 
+Instead of keeping everything in a single file like:
 
-### Avoid using `pumpAndSettle`
+- `button_test.dart`
 
-As per the API docs for [pumpAndSettle](https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pumpAndSettle.html), prefer using explicit [`pump`](https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pump.html) calls rather than `pumpAndSettle`.
+that includes layout, semantics, and interaction tests, it can be split into:
 
-Using `pumpAndSettle`, especially without checking its return value, makes it very easy for bugs to sneak in where we trigger animations across multiple frames instead of immediately. It is almost always the case that a call to `pumpAndSettle` is more strictly correctly written as two `pump` calls, one to trigger the animations and one (with a duration) to jump to the point after the animations.
+- `button_layout_test.dart`
+- `button_semantics_test.dart`
+- `button_interaction_test.dart`
 
+Or group tests by behavior:
+
+- `navigator_push_test.dart`
+- `navigator_pop_test.dart`
+- `navigator_transition_test.dart`
+
+For more on writing tests, see [Running & writing tests](./testing/Running-and-writing-tests.md).
 
 ## Naming
 
@@ -1079,21 +1478,9 @@ However, where possible avoid global constants. Rather than `kDefaultButtonColor
 
 ### Avoid abbreviations
 
-Unless the abbreviation is more recognizable than the expansion (e.g. XML, HTTP, JSON), expand abbrevations
+Unless the abbreviation is more recognizable than the expansion (e.g. XML, HTTP, JSON), expand abbreviations
 when selecting a name for an identifier. In general, avoid one-character names unless one character is idiomatic
 (for example, prefer `index` over `i`, but prefer `x` over `horizontalPosition`).
-
-
-### Avoid anonymous parameter names
-
-Provide full type information and names even for parameters that are otherwise unused. This makes it easier for
-people reading the code to tell what is actually going on (e.g. what is being ignored). For example:
-
-```dart
-  onTapDown: (TapDownDetails details) { print('hello!'); }, // GOOD
-  onTapUp: (_) { print('good bye'); }, // BAD
-```
-
 
 ### Naming rules for typedefs and function variables
 
@@ -1169,7 +1556,7 @@ documented top-level library intended to be imported by users.
 
 The definition of "New" changes as code grows and time passes. If the code
 needed a replacement version the odds of needing another replacement in the
-future is higher. Instead find a name that represents the idea being being used
+future is higher. Instead find a name that represents the idea being used
 or replaced.
 
 
@@ -1205,7 +1592,7 @@ Example:
 
 TODOs should include the string TODO in all caps, followed by the GitHub username of
 the person with the best _context_ about the problem referenced by the TODO in
-parenthesis. A TODO is not a commitment that the person referenced will fix the
+parentheses. A TODO is not a commitment that the person referenced will fix the
 problem, it is intended to be the person with enough context to explain the problem.
 Thus, when you create a TODO, it is almost always your username that is given.
 
@@ -1261,20 +1648,10 @@ Generally the closure passed to `setState` should include all the code that chan
 These guidelines have no technical effect, but they are still important purely
 for consistency and readability reasons.
 
-We do not yet use `dartfmt` (except in flutter/packages).
-Flutter code tends to use patterns that
-the standard Dart formatter does not handle well. We are
-[working with Dart team](https://github.com/flutter/flutter/issues/2025) to make `dartfmt` aware of these patterns.
+We use `dart format` to auto-format all Dart code. This is enforced by our CI.
 
-
-### In defense of the extra work that hand-formatting entails
-
-Flutter code might eventually be read by hundreds of thousands of people each day.
-Code that is easier to read and understand saves these people time. Saving each
-person even a second each day translates into hours or even _days_ of saved time
-each day. The extra time spent by people contributing to Flutter directly translates
-into real savings for our developers, which translates to real benefits to our end
-users as our developers learn the framework faster.
+Beyond whitespace formatting handled by the formatter, this section discusses
+additional guidelines for code structure to ensure consistency and readability.
 
 
 ### Constructors come first in a class
@@ -1321,446 +1698,20 @@ any code that operates on all of them should operate on them in the
 same order (unless the order matters).
 
 
-### Constructor syntax
+### Prefer a maximum line length of 100 characters for comments and docs
 
-If you call `super()` in your initializer list, put a space between the
-constructor arguments' closing parenthesis and the colon. If there's
-other things in the initializer list, align the `super()` call with the
-other arguments. Don't call `super` if you have no arguments to pass up
-to the superclass.
+Aim for a maximum line length of roughly 100 characters for comments and docs. Existing docs may use a
+line length of 80 characters and should not be reflowed to a maximum line length of 100 to simplify
+reviewing docs in PRs.
 
-```dart
-// one-line constructor example
-class ConstantTween<T> extends Tween<T> {
-  ConstantTween(T value) : super(begin: value, end: value);
-
-  // ...
-}
-
-// fully expanded constructor example
-class ConstantTween<T> extends Tween<T> {
-  ConstantTween(
-    T value,
-  ) : super(
-        begin: value,
-        end: value,
-      );
-
-  // ...
-}
-```
-
-
-### Prefer a maximum line length of 80 characters
-
-Aim for a maximum line length of roughly 80 characters, but prefer going over if breaking the
-line would make it less readable, or if it would make the line less consistent
-with other nearby lines. Prefer avoiding line breaks after assignment operators.
-
-```dart
-// BAD (breaks after assignment operator and still goes over 80 chars)
-final int a = 1;
-final int b = 2;
-final int c =
-    a.very.very.very.very.very.long.expression.that.returns.three.eventually().but.is.very.long();
-final int d = 4;
-final int e = 5;
-
-// BETTER (consistent lines, not much longer than the earlier example)
-final int a = 1;
-final int b = 2;
-final int c = a.very.very.very.very.very.long.expression.that.returns.three.eventually().but.is.very.long();
-final int d = 4;
-final int e = 5;
-```
-
-```dart
-// BAD (breaks after assignment operator)
-final List<FooBarBaz> _members =
-  <FooBarBaz>[const Quux(), const Qaax(), const Qeex()];
-
-// BETTER (only slightly goes over 80 chars)
-final List<FooBarBaz> _members = <FooBarBaz>[const Quux(), const Qaax(), const Qeex()];
-
-// BETTER STILL (fits in 80 chars)
-final List<FooBarBaz> _members = <FooBarBaz>[
-  const Quux(),
-  const Qaax(),
-  const Qeex(),
-];
-```
-
-
-### Indent multi-line argument and parameter lists by 2 characters
-
-When breaking an argument list into multiple lines, indent the
-arguments two characters from the previous line.
-
-Example:
-
-```dart
-Foo f = Foo(
-  bar: 1.0,
-  quux: 2.0,
-);
-```
-
-When breaking a parameter list into multiple lines, do the same.
-
-
-### If you have a newline after some opening punctuation, match it on the closing punctuation.
-
-And vice versa.
-
-Example:
-
-```dart
-// BAD:
-  foo(
-    bar, baz);
-  foo(
-    bar,
-    baz);
-  foo(bar,
-    baz
-  );
-
-// GOOD:
-  foo(bar, baz);
-  foo(
-    bar,
-    baz,
-  );
-```
-
-### Use a trailing comma for arguments, parameters, and list items, but only if they each have their own line.
-
-Example:
-```dart
-List<int> myList = [
-  1,
-  2,
-];
-myList = <int>[3, 4];
-
-foo1(
-  bar,
-  baz,
-);
-foo2(bar, baz);
-```
-
-If one of the items is a multi-line callback, collection literal,
-or switch expression, it can be added without a trailing comma.
-
-```dart
-// GOOD:
-foo(
-  bar,
-  baz,
-  switch (value) {
-    true  => ScrollDirection.forward,
-    false => ScrollDirection.reverse,
-    null  => ScrollDirection.idle,
-  },
-);
-
-// also GOOD:
-foo(bar, baz, switch (value) {
-  true  => ScrollDirection.forward,
-  false => ScrollDirection.reverse,
-  null  => ScrollDirection.idle,
-});
-
-// The same applies to collection literals and callbacks:
-foo(<String>[
-  'list item 1',
-  'list item 2',
-  'list item 3',
-]);
-
-Future.delayed(Durations.short1, () {
-  if (mounted && _shouldOpenDrawer) {
-    _drawerController.forward();
-  }
-});
-```
-
-Whether to put things all on one line or whether to have one line per item is an aesthetic choice. We prefer whatever ends up being most readable. Typically this means that when everything would fit on one line, put it all on one line, otherwise, split it one item to a line.
-
-However, there are exceptions. For example, if there are six back-to-back lists and all but one of them need multiple lines, then one would not want to have the single case that does fit on one line use a different style than the others.
-
-```dart
-  // BAD (because the second list is unnecessarily and confusingly different than the others):
-  List<FooBarBaz> myLongList1 = <FooBarBaz>[
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-  ];
-  List<Quux> myLongList2 = <Quux>[ Quux(1), Quux(2) ];
-  List<FooBarBaz> myLongList3 = <FooBarBaz>[
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-  ];
-
-  // GOOD (code is easy to scan):
-  List<FooBarBaz> myLongList1 = <FooBarBaz>[
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-  ];
-  List<Quux> myLongList2 = <Quux>[
-    Quux(1),
-    Quux(2),
-  ];
-  List<FooBarBaz> myLongList3 = <FooBarBaz>[
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-    FooBarBaz(one: firstArgument, two: secondArgument, three: thirdArgument),
-  ];
-```
-
-
-### Consider using `=>` for short functions and methods
-
-But only use `=>` when everything, including the function declaration, fits
-on a single line.
-
-Example:
-
-```dart
-// BAD:
-String capitalize(String s) =>
-  '${s[0].toUpperCase()}${s.substring(1)}';
-
-// GOOD:
-String capitalize(String s) => '${s[0].toUpperCase()}${s.substring(1)}';
-
-String capitalize(String s) {
-  return '${s[0].toUpperCase()}${s.substring(1)}';
-}
-```
-
-### Use `=>` for getters and callbacks that just return literals or switch expressions
-
-```dart
-// GOOD:
-List<Color> get favorites => <Color>[
-  const Color(0xFF80FFFF),
-  const Color(0xFF00FFF0),
-  const Color(0xFF4000FF),
-  _mysteryColor(),
-];
-
-// GOOD:
-bool get isForwardOrCompleted => switch (status) {
-  AnimationStatus.forward || AnimationStatus.completed => true,
-  AnimationStatus.reverse || AnimationStatus.dismissed => false,
-};
-```
-
-It's important to use discretion, since there are cases where a function body
-is easier to visually parse:
-
-```dart
-// OKAY, but the code is more dense than it could be:
-String? get validated => switch(input[_inputIndex]?.trim()) {
-  final String value when value.isNotEmpty => value,
-  _ => null,
-}
-
-// BETTER (more verbose, but also more readable):
-String? get validated {
-  final String? value = input[_inputIndex]?.trim();
-
-  if (value != null && value.isNotEmpty) {
-    return value;
-  }
-  return null;
-}
-```
-
-If your code is passing an inline closure containing only a `return` statement,
-you can instead use the `=>` form.\
-When doing this, the closing `]`, `}`, or `)` bracket will have the same
-indentation as the line where the callback starts.
-
-For example:
-
-```dart
-    // GOOD, but slightly more verbose than necessary since it doesn't use =>
-    @override
-    Widget build(BuildContext context) {
-      return PopupMenuButton<String>(
-        onSelected: (String value) { print('Selected: $value'); },
-        itemBuilder: (BuildContext context) {
-          return <PopupMenuItem<String>>[
-            PopupMenuItem<String>(
-              value: 'Friends',
-              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
-            ),
-            PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
-            ),
-          ];
-        }
-      );
-    }
-
-    // GOOD, does use =>, slightly briefer
-    @override
-    Widget build(BuildContext context) {
-      return PopupMenuButton<String>(
-        onSelected: (String value) { print('Selected: $value'); },
-        itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-          PopupMenuItem<String>(
-            value: 'Friends',
-            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
-          ),
-          PopupMenuItem<String>(
-            value: 'Events',
-            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
-          ),
-        ]
-      );
-    }
-```
-
-The important part is that the closing punctuation lines up with the start
-of the line that has the opening punctuation, so that you can easily determine
-what's going on by just scanning the indentation on the left edge.
-
-
-### Prefer single line for short collection-if and collection-for
-
-If the code fits in a single line don't split it.
-
-For example:
-
-```dart
-// BAD
-final List<String> args = <String>[
-  'test',
-  if (useFlutterTestFormatter) '-rjson'
-  else '-rcompact',
-  '-j1',
-  if (!hasColor)
-    '--no-color',
-  for (final String opt in others)
-    opt,
-];
-
-// GOOD
-final List<String> args = <String>[
-  'test',
-  if (useFlutterTestFormatter) '-rjson' else '-rcompact',
-  '-j1',
-  if (!hasColor) '--no-color',
-  for (final String opt in others) opt,
-];
-```
-
-Otherwise indent with 2 spaces
-
-```dart
-// GOOD
-final List<String> args = <String>[
-  'test',
-  if (useFlutterTestFormatter)
-    '-rjson.very.very.very.very.very.very.very.very.long'
-  else
-    '-rcompact.very.very.very.very.very.very.very.very.long',
-  '-j1',
-  if (!hasColor)
-    '--no-color.very.very.very.very.very.very.very.very.long',
-  for (final String opt in others)
-    methodVeryVeryVeryVeryVeryVeryVeryVeryVeryLong(opt),
-];
-```
-
-### Put spread inside collection-if or collection-for on the same line
-
-Spreads inside collection-if or collection-for are used to insert several elements. It's easier to read to have spread on the line of `if`, `else`, or `for`.
-
-```dart
-// BAD
-final List<String> args = <String>[
-  'test',
-  if (condA)
-    ...<String>[
-      'b',
-      'c',
-    ]
-  else
-    '-rcompact',
-  for (final String opt in others)
-    ...<String>[
-      m1(opt),
-      m2(opt),
-    ],
-];
-
-// GOOD
-final List<String> args = <String>[
-  'test',
-  if (condA) ...<String>[
-    'b',
-    'c',
-  ] else
-    '-rcompact',
-  for (final String opt in others) ...<String>[
-    m1(opt),
-    m2(opt),
-  ],
-];
-```
-
+Line length for code is automatically handled by `dart format`, which is configured to use a maximum
+line length of 100.
 
 ### Use braces for long functions and methods
 
-Use a block (with braces) when a body would wrap onto more than one line (as opposed to using `=>`; the cases where you can use `=>` are discussed in the previous two guidelines).
+Use a block (with braces) when a body would wrap onto more than one line (as opposed to using arrow
+syntax, `=>`).
 
-
-### Align expressions
-
-Where possible, subexpressions on different lines should be aligned, to make the structure of the expression easier. When doing this with a `return` statement chaining `||` or `&&` operators, consider putting the operators on the left hand side instead of the right hand side.
-
-```dart
-// BAD:
-if (foo.foo.foo + bar.bar.bar * baz - foo.foo.foo * 2 +
-    bar.bar.bar * 2 * baz > foo.foo.foo) {
-  // ...
-}
-
-// GOOD (notice how it makes it obvious that this code can be simplified):
-if (foo.foo.foo     + bar.bar.bar     * baz -
-    foo.foo.foo * 2 + bar.bar.bar * 2 * baz   > foo.foo.foo) {
-  // ...
-}
-// After simplification, it fits on one line anyway:
-if (bar.bar.bar * 3 * baz > foo.foo.foo * 2) {
-  // ...
-}
-```
-
-```dart
-// BAD:
-return foo.x == x &&
-    foo.y == y &&
-    foo.z == z;
-
-// GOOD:
-return foo.x == x &&
-       foo.y == y &&
-       foo.z == z;
-
-// ALSO GOOD:
-return foo.x == x
-    && foo.y == y
-    && foo.z == z;
-```
 
 ### Prefer `+=` over `++`
 
@@ -1886,12 +1837,11 @@ documenting why exactly you are importing particularly libraries and
 can be used more generally when importing large libraries for very
 narrow purposes.
 
-By convention, `dart:ui` is imported using `import 'dart:ui' show
-...;` for common APIs (this isn't usually necessary because a lower
-level will have done it for you), and as `import 'dart:ui' as ui show
-...;` for low-level APIs, in both cases listing all the identifiers
-being imported. See
-[basic_types.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/painting/basic_types.dart)
+By convention, `dart:ui` is imported using `import 'dart:ui' show ...;` for
+common APIs (this isn't usually necessary because a lower
+level will have done it for you), and as `import 'dart:ui' as ui show ...;`
+for low-level APIs, in both cases listing all the identifiers being imported.
+See [basic_types.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/painting/basic_types.dart)
 in the `painting` package for details of which identifiers we import
 which way. Other packages are usually imported undecorated unless they
 have a convention of their own (e.g. `path` is imported `as path`).

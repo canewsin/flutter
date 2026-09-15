@@ -20,7 +20,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icons.dart';
-import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -113,6 +112,7 @@ class FilterChip extends StatelessWidget
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -160,6 +160,7 @@ class FilterChip extends StatelessWidget
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -203,7 +204,7 @@ class FilterChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
-  final MaterialStateProperty<Color?>? color;
+  final WidgetStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -234,6 +235,8 @@ class FilterChip extends StatelessWidget
   final BoxConstraints? deleteIconBoxConstraints;
   @override
   final ChipAnimationStyle? chipAnimationStyle;
+  @override
+  final MouseCursor? mouseCursor;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -244,10 +247,10 @@ class FilterChip extends StatelessWidget
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
-      : null;
-    final Widget? resolvedDeleteIcon = deleteIcon
-      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
+        ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
+        : null;
+    final Widget? resolvedDeleteIcon =
+        deleteIcon ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -286,6 +289,7 @@ class FilterChip extends StatelessWidget
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
+      mouseCursor: mouseCursor,
     );
   }
 }
@@ -297,6 +301,7 @@ class FilterChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _FilterChipDefaultsM3 extends ChipThemeData {
   _FilterChipDefaultsM3(
     this.context,
@@ -333,19 +338,19 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get color =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected) && states.contains(WidgetState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? _colors.onSurface.withOpacity(0.12)
           : _colors.onSurface.withOpacity(0.12);
       }
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? null
           : _colors.onSurface.withOpacity(0.12);
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return _chipVariant == _ChipVariant.flat
           ? _colors.secondaryContainer
           : _colors.secondaryContainer;
@@ -380,7 +385,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
     ? isEnabled
-      ? BorderSide(color: _colors.outline)
+      ? BorderSide(color: _colors.outlineVariant)
       : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
@@ -416,5 +421,6 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilterChip

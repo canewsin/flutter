@@ -17,7 +17,6 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
-import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -101,6 +100,7 @@ class ChoiceChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -143,6 +143,7 @@ class ChoiceChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -178,7 +179,7 @@ class ChoiceChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
-  final MaterialStateProperty<Color?>? color;
+  final WidgetStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -207,6 +208,8 @@ class ChoiceChip extends StatelessWidget
   final BoxConstraints? avatarBoxConstraints;
   @override
   final ChipAnimationStyle? chipAnimationStyle;
+  @override
+  final MouseCursor? mouseCursor;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -218,8 +221,8 @@ class ChoiceChip extends StatelessWidget
     assert(debugCheckHasMaterial(context));
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _ChoiceChipDefaultsM3(context, isEnabled, selected, _chipVariant)
-      : null;
+        ? _ChoiceChipDefaultsM3(context, isEnabled, selected, _chipVariant)
+        : null;
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -253,6 +256,7 @@ class ChoiceChip extends StatelessWidget
       iconTheme: iconTheme,
       avatarBoxConstraints: avatarBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
+      mouseCursor: mouseCursor,
     );
   }
 }
@@ -264,6 +268,7 @@ class ChoiceChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _ChoiceChipDefaultsM3 extends ChipThemeData {
   _ChoiceChipDefaultsM3(
     this.context,
@@ -300,19 +305,19 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get color =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected) && states.contains(WidgetState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? _colors.onSurface.withOpacity(0.12)
           : _colors.onSurface.withOpacity(0.12);
       }
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? null
           : _colors.onSurface.withOpacity(0.12);
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return _chipVariant == _ChipVariant.flat
           ? _colors.secondaryContainer
           : _colors.secondaryContainer;
@@ -347,7 +352,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
     ? isEnabled
-      ? BorderSide(color: _colors.outline)
+      ? BorderSide(color: _colors.outlineVariant)
       : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
@@ -383,5 +388,6 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ChoiceChip

@@ -3,15 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../utils.dart';
 import 'use_cases.dart';
 
 class TextFieldPasswordUseCase extends UseCase {
+  TextFieldPasswordUseCase();
+
   @override
   String get name => 'TextField password';
 
   @override
   String get route => '/text-field-password';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => _MainWidget();
@@ -25,24 +31,17 @@ class _MainWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: ListView(
         children: const <Widget>[
           TextField(
             key: Key('enabled password'),
-            decoration: InputDecoration(
-              labelText: 'Password',
-            ),
+            decoration: InputDecoration(labelText: 'Password'),
             obscureText: true,
           ),
           TextField(
             key: Key('disabled password'),
-            decoration: InputDecoration(
-              labelText: 'Password',
-            ),
+            decoration: InputDecoration(labelText: 'Password'),
             enabled: false,
             obscureText: true,
           ),

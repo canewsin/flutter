@@ -7,26 +7,22 @@ import 'dart:js_interop';
 import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
-Future<void> main() async  {
-  bool executedAssert = false;
+Future<void> main() async {
+  var executedAssert = false;
   assert(() {
     executedAssert = true;
     return true;
   }());
 
-  final StringBuffer output = StringBuffer();
+  final output = StringBuffer();
   if (executedAssert == kDebugMode) {
     output.write('--- TEST SUCCEEDED ---');
   } else {
     output.write('--- TEST FAILED ---');
   }
 
-  await web.window.fetch(
-    '/test-result'.toJS,
-    web.RequestInit(
-      method: 'POST',
-      body: '$output'.toJS,
-    )
-  ).toDart;
+  await web.window
+      .fetch('/test-result'.toJS, web.RequestInit(method: 'POST', body: '$output'.toJS))
+      .toDart;
   print(output);
 }

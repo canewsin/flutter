@@ -116,5 +116,4 @@ transforms:
     changes:
       - kind: 'rename'
         newName: 'fromViewPadding'
-
 # Before adding a new fix: read instructions at the top of this file.

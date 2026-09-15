@@ -30,7 +30,10 @@ abstract final class ElevationOverlay {
   /// just return [color] unmodified.
   static Color applySurfaceTint(Color color, Color? surfaceTint, double elevation) {
     if (surfaceTint != null && surfaceTint != Colors.transparent) {
-      return Color.alphaBlend(surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)), color);
+      return Color.alphaBlend(
+        surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)),
+        color,
+      );
     }
     return color;
   }
@@ -46,7 +49,7 @@ abstract final class ElevationOverlay {
     }
 
     // Walk the opacity list and find the closest match(es) for the elevation.
-    int index = 0;
+    var index = 0;
     while (elevation >= _surfaceTintElevationOpacities[index].elevation) {
       // If we found it exactly or walked off the end of the list just return it.
       if (elevation == _surfaceTintElevationOpacities[index].elevation ||
@@ -160,6 +163,7 @@ class _ElevationOpacity {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 // Surface tint opacities based on elevations according to the
 // Material Design 3 specification:
 //   https://m3.material.io/styles/color/the-color-system/color-roles
@@ -172,5 +176,6 @@ const List<_ElevationOpacity> _surfaceTintElevationOpacities = <_ElevationOpacit
   _ElevationOpacity(8.0, 0.12),  // Elevation level 4
   _ElevationOpacity(12.0, 0.14), // Elevation level 5
 ];
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - SurfaceTint

@@ -3,15 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../utils.dart';
 import 'use_cases.dart';
 
 class CheckBoxListTile extends UseCase {
+  CheckBoxListTile();
+
   @override
   String get name => 'CheckBoxListTile';
 
   @override
   String get route => '/check-box-list-tile';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => _MainWidget();
@@ -30,9 +36,7 @@ class _MainWidgetState extends State<_MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: ListView(
         children: <Widget>[
           CheckboxListTile(

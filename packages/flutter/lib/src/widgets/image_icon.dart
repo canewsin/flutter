@@ -32,7 +32,12 @@ class ImageIcon extends StatelessWidget {
     this.size,
     this.color,
     this.semanticLabel,
-  });
+    this.useOriginalColors = false,
+  }) : assert(
+         !(useOriginalColors && color != null),
+         'Cannot provide a color while useOriginalColors is true. '
+         'To use a specific color, set useOriginalColors to false or omit it.',
+       );
 
   /// The image to display as the icon.
   ///
@@ -67,6 +72,21 @@ class ImageIcon extends StatelessWidget {
   ///    underlying	 [Semantics] widget.
   final String? semanticLabel;
 
+  /// Whether to render the image using its original colors.
+  ///
+  /// If this is false (the default), the image is colorized by merging the
+  /// [color] (or, if that is null, the [IconTheme] color) with the image
+  /// using [BlendMode.srcIn]. This is the standard behavior for icons.
+  ///
+  /// If this is true, the color-blend filter is disabled, and the image is
+  /// rendered with its original colors. This allows multi-colored images,
+  /// such as brand logos, to be displayed accurately.
+  ///
+  /// If this is true, [color] must be null.
+  ///
+  /// Defaults to false.
+  final bool useOriginalColors;
+
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
@@ -92,7 +112,7 @@ class ImageIcon extends StatelessWidget {
         image: image!,
         width: iconSize,
         height: iconSize,
-        color: iconColor,
+        color: useOriginalColors ? null : iconColor,
         fit: BoxFit.scaleDown,
         excludeFromSemantics: true,
       ),
@@ -102,7 +122,9 @@ class ImageIcon extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ImageProvider>('image', image, ifNull: '<empty>', showName: false));
+    properties.add(
+      DiagnosticsProperty<ImageProvider>('image', image, ifNull: '<empty>', showName: false),
+    );
     properties.add(DoubleProperty('size', size, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
   }

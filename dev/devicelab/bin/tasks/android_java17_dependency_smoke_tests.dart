@@ -9,28 +9,36 @@ import 'package:flutter_devicelab/framework/dependency_smoke_test_task_definitio
 import 'package:flutter_devicelab/framework/framework.dart';
 
 // Methodology:
-// - AGP: all versions within our support range (*).
+// - AGP: versions within our support range (*). Minimum, Maximum known supported versions and template versions.
 // - Gradle: The version that AGP lists as the default Gradle version for that
 //           AGP version under the release notes, e.g.
 //           https://developer.android.com/build/releases/past-releases/agp-8-4-0-release-notes.
 // - Kotlin: No methodology as of yet.
 // (*) - support range defined in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts.
-// Note that compileSdk 35 requires AGP 8.1.0+, so override to compileSdk 34 for AGP 8.0.
 List<VersionTuple> versionTuples = <VersionTuple>[
-  VersionTuple(agpVersion: '8.0.0', gradleVersion: '8.0', kotlinVersion: '1.8.22', compileSdkVersion: '34'),
-  VersionTuple(agpVersion: '8.1.0', gradleVersion: '8.0', kotlinVersion: '1.8.22'),
-  VersionTuple(agpVersion: '8.2.0', gradleVersion: '8.2', kotlinVersion: '1.8.22'),
-  VersionTuple(agpVersion: '8.3.0', gradleVersion: '8.4', kotlinVersion: '1.8.22'),
-  VersionTuple(agpVersion: '8.4.0', gradleVersion: '8.6', kotlinVersion: '1.8.22'),
-  VersionTuple(agpVersion: '8.5.0', gradleVersion: '8.7', kotlinVersion: '1.8.22'),
-];
+  // Minimum supported
+  VersionTuple(agpVersion: '8.11.1', gradleVersion: '8.14', kotlinVersion: '2.2.20'),
+  // Template and max known
+  // TODO(jesswon): Separate max known once there exists a newer one: https://github.com/flutter/flutter/issues/189112.
+  VersionTuple(agpVersion: '9.1.0', gradleVersion: '9.3.1', kotlinVersion: '2.4.0'),
+  /* Others */
+  VersionTuple(agpVersion: '8.11.1', gradleVersion: '8.14', kotlinVersion: '2.2.20'),
+  VersionTuple(agpVersion: '8.12.0', gradleVersion: '8.14', kotlinVersion: '2.2.20'),
+]; // Max length is 7 entries until this test is split See https://github.com/flutter/flutter/issues/167495.
 
 Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
-  const LocalFileSystem fileSystem = LocalFileSystem();
+  const fileSystem = LocalFileSystem();
 
-  final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_android_dependency_version_tests');
+  /// The temp [Directory] purposedly has a space in it.
+  final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
+    'flutter android_dependency_version_tests',
+  );
   await task(() {
-    return buildFlutterApkWithSpecifiedDependencyVersions(versionTuples: versionTuples, tempDir: tempDir, localFileSystem: fileSystem);
+    return buildFlutterApkWithSpecifiedDependencyVersions(
+      versionTuples: versionTuples,
+      tempDir: tempDir,
+      localFileSystem: fileSystem,
+    );
   });
 }

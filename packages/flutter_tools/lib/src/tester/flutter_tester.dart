@@ -29,9 +29,7 @@ class FlutterTesterApp extends ApplicationPackage {
     return FlutterTesterApp._(fileSystem.currentDirectory);
   }
 
-  FlutterTesterApp._(Directory directory)
-    : _directory = directory,
-      super(id: directory.path);
+  FlutterTesterApp._(Directory directory) : _directory = directory, super(id: directory.path);
 
   final Directory _directory;
 
@@ -45,24 +43,16 @@ class FlutterTesterApp extends ApplicationPackage {
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(super.id, {
-    required ProcessManager processManager,
-    required FlutterVersion flutterVersion,
+  FlutterTesterDevice(
+    super.id, {
+    required this._processManager,
+    required this._flutterVersion,
     required super.logger,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) : _processManager = processManager,
-       _flutterVersion = flutterVersion,
-       _logger = logger,
-       _fileSystem = fileSystem,
-      _artifacts = artifacts,
-      _nativeAssetsBuilder = nativeAssetsBuilder,
-       super(
-        platformType: null,
-        category: null,
-        ephemeral: false,
-      );
+    required this._fileSystem,
+    required this._artifacts,
+    this._nativeAssetsBuilder,
+  }) : _logger = logger,
+       super(platformType: null, category: null, ephemeral: false);
 
   final ProcessManager _processManager;
   final FlutterVersion _flutterVersion;
@@ -102,35 +92,29 @@ class FlutterTesterDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  void clearLogs() { }
-
-  final DesktopLogReader _logReader = DesktopLogReader();
+  Future<CpuArch> get cpuArch async => CpuArch.unknown;
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
-  }) {
+  void clearLogs() {}
+
+  final _logReader = DesktopLogReader();
+
+  @override
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     return _logReader;
   }
 
   @override
-  Future<bool> installApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
-  Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => false;
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   Future<LaunchResult> startApp(
@@ -148,8 +132,9 @@ class FlutterTesterDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final Directory assetDirectory = _fileSystem.systemTempDirectory
-      .createTempSync('flutter_tester.');
+    final Directory assetDirectory = _fileSystem.systemTempDirectory.createTempSync(
+      'flutter_tester.',
+    );
     final String applicationKernelFilePath = getKernelPathForTransformerOptions(
       _fileSystem.path.join(assetDirectory.path, 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
@@ -166,18 +151,16 @@ class FlutterTesterDevice extends Device {
       assetDirPath: assetDirectory.path,
     );
 
-    final List<String> command = <String>[
+    final command = <String>[
       _artifacts.getArtifactPath(Artifact.flutterTester),
       '--run-forever',
       '--non-interactive',
-      if (debuggingOptions.enableDartProfiling)
-        '--enable-dart-profiling',
+      if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
       '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       '--flutter-assets-dir=${assetDirectory.path}',
-      if (debuggingOptions.startPaused)
-        '--start-paused',
-      if (debuggingOptions.disableServiceAuthCodes)
-        '--disable-service-auth-codes',
+      if (debuggingOptions.startPaused) '--start-paused',
+      if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (debuggingOptions.disableServiceOriginCheck) '--disable-service-origin-check',
       if (debuggingOptions.hostVmServicePort != null)
         '--vm-service-port=${debuggingOptions.hostVmServicePort}',
       applicationKernelFilePath,
@@ -186,25 +169,27 @@ class FlutterTesterDevice extends Device {
     ProtocolDiscovery? vmServiceDiscovery;
     try {
       _logger.printTrace(command.join(' '));
-      _process = await _processManager.start(command,
+      _process = await _processManager.start(
+        command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
           if (globals.platform.isWindows && _nativeAssetsBuilder != null)
-            'PATH': '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${globals.platform.environment['PATH']}',
+            'PATH':
+                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${globals.platform.environment['PATH']}',
         },
       );
       if (!debuggingOptions.debuggingEnabled) {
         return LaunchResult.succeeded();
       }
 
+      _logReader.listenToProcessOutput(_process!);
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(),
+        SingleLaunchLogReader(_logReader.logLines, _process!.exitCode),
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: debuggingOptions.ipv6,
         logger: _logger,
       );
-      _logReader.initializeProcess(_process!);
 
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {
@@ -223,32 +208,21 @@ class FlutterTesterDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
-  }) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     _process?.kill();
     _process = null;
     return true;
   }
 
   @override
-  Future<bool> uninstallApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  DevFSWriter createDevFSWriter(
-    ApplicationPackage? app,
-    String? userIdentifier,
-  ) {
-    return LocalDevFSWriter(
-      fileSystem: _fileSystem,
-    );
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
+    return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 
   @override
@@ -267,17 +241,17 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required FlutterVersion flutterVersion,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _testerDevice = FlutterTesterDevice(
-        kTesterDeviceId,
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        processManager: processManager,
-        logger: logger,
-        flutterVersion: flutterVersion,
-        nativeAssetsBuilder: nativeAssetsBuilder,
-      ),
+         kTesterDeviceId,
+         fileSystem: fileSystem,
+         artifacts: artifacts,
+         processManager: processManager,
+         logger: logger,
+         flutterVersion: flutterVersion,
+         nativeAssetsBuilder: nativeAssetsBuilder,
+       ),
        super('Flutter tester');
 
-  static const String kTesterDeviceId = 'flutter-tester';
+  static const kTesterDeviceId = 'flutter-tester';
 
   static bool showFlutterTesterDevice = false;
 
@@ -290,7 +264,10 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
 

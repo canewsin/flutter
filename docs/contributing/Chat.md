@@ -2,7 +2,7 @@
 
 <img src="https://github.com/flutter/flutter/assets/551196/1381071b-e482-4e07-b096-60e9219d3ff7" width=300 align=right alt="">
 
-The Flutter team uses a [Discord server](https://discord.com/channels/608014603317936148). [This is invite link for Flutter's Discord server](https://discord.gg/ht477J5PyH). Please do not share either link directly, instead share links to this page.
+The Flutter team uses a [Discord server](https://discord.com/channels/608014603317936148). [This is the invite link for Flutter's Discord server](https://discord.gg/afe9KAsMCw). Please do not share either link directly, instead share links to this page.
 
 The server is open to the public, though some channels are intended only for people who are actively contributing. **See the #welcome channel for instructions on posting to the server (you won't be able to see the channels until you acknowledge the rules there).**
 
@@ -69,6 +69,6 @@ Discord has both actual threads (temporary new channels) and a threadingish feat
 You can [change your status](https://support.discord.com/hc/en-us/articles/360035407531-Custom-Status) (online, away, custom messages) by clicking on your avatar in Discord.
 
 
-# Design documents
+# Design documents (RFCs)
 
-This page used to discuss how to create design docs, but that content is now on its own page: [Design documents](Design-Documents.md).
+Flutter design documents are authored and reviewed as Requests for Comments (RFCs) in the [Flutter RFC repository](https://github.com/flutter/rfc). See [Design documents](Design-Documents.md) for details on the process and guidelines.

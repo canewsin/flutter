@@ -54,6 +54,10 @@ If you want to help us triage, you are very welcome to do so!
    provide enough details that you can reproduce the problem, pointing out duplicates,
    and so on. Chat on the #hackers-triage channel to let us know what you're up to!
 
+   * **Do not** run an unsupervised agent that posts triage comments to the issue database.
+     Any automated agent needs to be approved in advance, after discussion with the
+     Flutter team.
+
 4. Familiarize yourself with our
    [issue hygiene](./docs/contributing/issue_hygiene/README.md) wiki page,
    which covers the meanings of some important GitHub labels and
@@ -91,7 +95,16 @@ for how to set up your development environment, or ask in #hackers-test on Disco
 Developing for Flutter
 ----------------------
 
-If you would prefer to write code, you may wish to start with our list of good first issues for [Flutter](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or for [Flutter DevTools](https://github.com/flutter/devtools/labels/good%20first%20issue). See the respective sections below for further instructions.
+If you prefer to write code, find an issue that interests
+you in [Flutter][flutter-issues] or [Flutter DevTools][devtools-issues].
+Reference the respective sections below for further instructions.
+
+If you are looking for guidance on good starter issues in a
+specific component, consider asking in the #hackers-new
+[Discord channel](./docs/contributing/Chat.md).
+
+[flutter-issues]: https://github.com/flutter/flutter/issues
+[devtools-issues]: https://github.com/flutter/devtools/issues
 
 ### Framework and Engine
 
@@ -101,7 +114,7 @@ that describe these methodologies. The following list is ordered: you
 are strongly recommended to go through these documents in the order
 presented.
 
-1. [Setting up your engine development environment](https://github.com/flutter/engine/blob/main/docs/contributing/Setting-up-the-Engine-development-environment.md),
+1. [Setting up your engine development environment](./docs/engine/contributing/Setting-up-the-Engine-development-environment.md),
    which describes the steps you need to configure your computer to
    work on Flutter's engine. If you only want to write code for the
    Flutter framework, you can skip this step. Flutter's engine mainly
@@ -120,10 +133,10 @@ presented.
    which includes advice for designing APIs for Flutter, and how to
    format code in the framework.
 
-5. [Flutter design doc template](https://flutter.dev/go/template),
-   which should be used when proposing a new technical design.  This is a good
+5. [Flutter RFC process](https://github.com/flutter/rfc),
+   which should be used when proposing a new technical design. This is a good
    practice to do before coding more intricate changes.
-   See also our [guidance for writing design docs](./docs/contributing/Design-Documents.md).
+   See also our [guidance for writing design docs and RFCs](./docs/contributing/Design-Documents.md).
 
 [![How to contribute to Flutter](https://img.youtube.com/vi/4yBgOBAOx_A/0.jpg)](https://www.youtube.com/watch?v=4yBgOBAOx_A)
 
@@ -142,6 +155,51 @@ are generally excited about improving the Dart & Flutter developer experience.
 
 Please see the DevTools [CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
 guide to get started.
+
+### Helping with existing PRs
+
+Once you've learned the process of contributing, if you aren't sure what to work on next you
+might be interested in helping other developers complete their contributions by picking up an
+incomplete patch from the list of [issues with partial patches][has-partial-patch].
+
+[has-partial-patch]: https://github.com/flutter/flutter/labels/has%20partial%20patch
+
+### Open Pull Request Limits
+
+To ensure our maintainers can provide timely and high-quality feedback, public Flutter repositories limit contributors without write access to **2 concurrent open pull requests per repository**.
+* **Draft PRs are exempt**: Work-in-progress draft PRs do not count toward your limit.
+* **Focus on Quality**: Once you reach the limit, please focus on merging or closing your existing PRs before opening new ones.
+
+For more details on pull request expectations and code review, see our [Tree hygiene](./docs/contributing/Tree-hygiene.md) guide.
+
+
+Reviewing Code
+--------------
+
+Reviewing code is just as valuable as writing it. It is one of the fastest ways
+to learn the codebase and help the team move faster. We welcome reviews from
+everyone, regardless of whether you have commit access.
+
+### The Reviewer Path
+
+Anyone can provide review feedback on a change, and doing so is an excellent way
+to learn the codebase.
+
+While reviews are welcome from the entire community, currently only members of
+the `flutter-hackers` group can grant the final approval required for a change
+to land. Consistently providing helpful code reviews is a valid and highly
+encouraged path to joining this group.
+
+For more information on how to earn commit access, please read the
+[Contributor access guide](./docs/contributing/Contributor-access.md).
+
+### How to Review
+
+If you are new to reviewing, start by:
+
+1. **[Reading the Tree Hygiene guide.](./docs/contributing/Tree-hygiene.md#how)** It contains a 10-point checklist of what we look for (CLA, tests, API design, etc.).
+2. **Leaving comments.** Even if you can't "Approve" a PR yet, pointing out a missing test or a style violation helps the author and saves the maintainers time.
+3. **Being Gracious.** Follow our mantra: Be polite, explain the why, and provide clear next steps.
 
 Outreach
 --------
@@ -162,7 +220,7 @@ API documentation
 -----------------
 
 Another great area to contribute in is sample code and API documentation. If this is an area that interests you, join our
-[Discord](./docs/contributing/Chat.md) server and introduce yourself on the #hackers-deverl, #hackers-framework,
+[Discord](./docs/contributing/Chat.md) server and introduce yourself on the #hackers-devrel, #hackers-framework,
 or #hackers-engine channels, describing your area of interest. As our API docs are integrated into our source code, see the
 "developing for Flutter" section above for a guide on how to set up your developer environment.
 

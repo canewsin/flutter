@@ -2,9 +2,9 @@ The Flutter project has many teams, including, but not limited to:
 
 * Design languages, covering:
 
-  * The material library ([flutter/flutter packages/flutter/lib/src/material](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material); label ["f: material design"](https://github.com/flutter/flutter/labels/f%3A%20material%20design))
+  * The material library ([flutter/packages packages/material_ui](https://github.com/flutter/packages/blob/main/packages/material_ui); label ["p: material_ui"](https://github.com/flutter/flutter/labels/p%3A%20material_ui))
 
-  * The cupertino library ([flutter/flutter packages/flutter/lib/src/cupertino](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/cupertino); label ["f: cupertino"](https://github.com/flutter/flutter/labels/f%3A%20cupertino))
+  * The cupertino library ([flutter/packages packages/cupertino_ui](https://github.com/flutter/packages/blob/main/packages/cupertino_ui); label ["p: cupertino_ui"](https://github.com/flutter/flutter/labels/p%3A%20cupertino_ui))
 
 * The Flutter framework (code in [flutter/flutter packages/flutter/lib/src/widgets](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/widgets),  [...rendering/](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/rendering),  [...painting/](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/painting), etc; label ["framework"](https://github.com/flutter/flutter/labels/framework))
 
@@ -12,13 +12,13 @@ The Flutter project has many teams, including, but not limited to:
 
 * Ecosystem ([flutter/plugins](https://github.com/flutter/plugins), [flutter/packages](https://github.com/flutter/packages), [the plugin infrastructure in flutter/flutter](https://github.com/flutter/flutter/tree/main/packages/flutter/lib/src/services); labels ["plugins"](https://github.com/flutter/flutter/labels/plugins), and ["packages"](https://github.com/flutter/flutter/labels/packages))
 
-* The Engine ([flutter/engine](https://github.com/flutter/engine) and [flutter/buildroot](https://github.com/flutter/buildroot/); label ["engine"](https://github.com/flutter/flutter/labels/engine))
+* The Engine ([flutter engine](https://github.com/flutter/flutter/tree/main/engine) and [flutter/buildroot](https://github.com/flutter/buildroot/); label ["engine"](https://github.com/flutter/flutter/labels/engine))
 
-* Various platform-specific teams including iOS, Android, Windows, Linux, and macOS (some code in flutter/flutter and flutter/engine); labels ["platform-android"](https://github.com/flutter/flutter/labels/platform-android), ["platform-ios"](https://github.com/flutter/flutter/labels/platform-ios), etc).
+* Various platform-specific teams including iOS, Android, Windows, Linux, and macOS; labels ["platform-android"](https://github.com/flutter/flutter/labels/platform-android), ["platform-ios"](https://github.com/flutter/flutter/labels/platform-ios), etc).
 
-* Desktop-specific features (some code in flutter/flutter and flutter/engine, ["a: desktop"](https://github.com/flutter/flutter/labels/a%3A%20desktop))
+* Desktop-specific features (["a: desktop"](https://github.com/flutter/flutter/labels/a%3A%20desktop))
 
-* Web (some code in flutter/flutter and flutter/engine, label ["platform-web"](https://github.com/flutter/flutter/labels/platform-web))
+* Web (label ["platform-web"](https://github.com/flutter/flutter/labels/platform-web))
 
 * Developer experience (e.g. [the devtools package](https://github.com/flutter/devtools/))
 

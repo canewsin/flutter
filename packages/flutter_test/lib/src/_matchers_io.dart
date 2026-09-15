@@ -30,7 +30,7 @@ Future<ui.Image> captureImage(Element element) {
     renderObject = renderObject.parent!;
   }
   assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
+  final layer = renderObject.debugLayer! as OffsetLayer;
   return layer.toImage(renderObject.paintBounds);
 }
 
@@ -99,7 +99,9 @@ class MatchesGoldenFile extends AsyncMatcher {
       imageFuture = captureImage(elements.single);
       disposeImage = true;
     } else {
-      throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
+      throw AssertionError(
+        'must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>',
+      );
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
@@ -118,7 +120,10 @@ class MatchesGoldenFile extends AsyncMatcher {
           return null;
         }
         try {
-          final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
+          final bool success = await goldenFileComparator.compare(
+            bytes.buffer.asUint8List(),
+            testNameUri,
+          );
           return success ? null : 'does not match';
         } on TestFailure catch (ex) {
           return ex.message;

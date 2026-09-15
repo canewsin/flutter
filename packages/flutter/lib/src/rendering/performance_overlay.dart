@@ -64,9 +64,14 @@ enum PerformanceOverlayOption {
 /// to true.
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
-  RenderPerformanceOverlay({
-    int optionsMask = 0,
-  }) : _optionsMask = optionsMask;
+  RenderPerformanceOverlay({this._optionsMask = 0});
+
+  static final int _rasterizerMask =
+      (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) |
+      (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index);
+  static final int _engineMask =
+      (1 << PerformanceOverlayOption.displayEngineStatistics.index) |
+      (1 << PerformanceOverlayOption.visualizeEngineStatistics.index);
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -97,14 +102,12 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   double get _intrinsicHeight {
-    const double kDefaultGraphHeight = 80.0;
-    double result = 0.0;
-    if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0)) {
+    const kDefaultGraphHeight = 80.0;
+    var result = 0.0;
+    if ((optionsMask & _rasterizerMask) != 0) {
       result += kDefaultGraphHeight;
     }
-    if ((optionsMask | (1 << PerformanceOverlayOption.displayEngineStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0)) {
+    if ((optionsMask & _engineMask) != 0) {
       result += kDefaultGraphHeight;
     }
     return result;
@@ -129,9 +132,11 @@ class RenderPerformanceOverlay extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
-    context.addLayer(PerformanceOverlayLayer(
-      overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
-      optionsMask: optionsMask,
-    ));
+    context.addLayer(
+      PerformanceOverlayLayer(
+        overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+        optionsMask: optionsMask,
+      ),
+    );
   }
 }

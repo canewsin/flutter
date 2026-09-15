@@ -10,31 +10,24 @@ import 'swift_package_manager_utils.dart';
 import 'test_utils.dart';
 
 void main() {
-  final String flutterBin = fileSystem.path.join(
-    getFlutterRoot(),
-    'bin',
-    'flutter',
-  );
-
-  final List<String> platforms = <String>['ios', 'macos'];
-  for (final String platformName in platforms) {
-    final List<String> iosLanguages = <String>[
-      if (platformName == 'ios') 'objc',
-      'swift',
-    ];
-
-    for (final String iosLanguage in iosLanguages) {
-      test('Create $platformName $iosLanguage app with Swift Package Manager disabled', () async {
-        final Directory workingDirectory = fileSystem.systemTempDirectory
-            .createTempSync('swift_package_manager_create_app_disabled.');
+  final platforms = <String>['ios', 'macos'];
+  for (final platformName in platforms) {
+    test(
+      'Create $platformName app with Swift Package Manager disabled',
+      () async {
+        final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+          'swift_package_manager_create_app_disabled.',
+        );
         final String workingDirectoryPath = workingDirectory.path;
         try {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
+          );
 
           final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
             flutterBin,
             workingDirectoryPath,
-            iosLanguage: iosLanguage,
             platform: platformName,
             options: <String>['--platforms=$platformName'],
           );
@@ -45,8 +38,10 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
+          final String pbxprojFileContents = pbxprojFile.readAsStringSync();
+          expect(pbxprojFileContents.contains('FlutterGeneratedPluginSwiftPackage'), isFalse);
           expect(
-            pbxprojFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage'),
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
             isFalse,
           );
 
@@ -77,25 +72,32 @@ void main() {
             ),
           );
         } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
-          ErrorHandlingFileSystem.deleteIfExists(
-            workingDirectory,
-            recursive: true,
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
           );
+          ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
-      }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+      },
+      skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
+    );
 
-      test('Create $platformName $iosLanguage app with Swift Package Manager enabled', () async {
-        final Directory workingDirectory = fileSystem.systemTempDirectory
-            .createTempSync('swift_package_manager_create_app_enabled.');
+    test(
+      'Create $platformName app with Swift Package Manager enabled',
+      () async {
+        final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+          'swift_package_manager_create_app_enabled.',
+        );
         final String workingDirectoryPath = workingDirectory.path;
         try {
-          await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+          await SwiftPackageManagerUtils.enableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
+          );
 
           final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
             flutterBin,
             workingDirectoryPath,
-            iosLanguage: iosLanguage,
             platform: platformName,
             options: <String>['--platforms=$platformName'],
           );
@@ -106,9 +108,11 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
+          final String pbxprojFileContents = pbxprojFile.readAsStringSync();
+          expect(pbxprojFileContents, contains('FlutterGeneratedPluginSwiftPackage'));
           expect(
-            pbxprojFile.readAsStringSync(),
-            contains('FlutterGeneratedPluginSwiftPackage'),
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isFalse,
           );
 
           final File xcschemeFile = fileSystem
@@ -119,10 +123,7 @@ void main() {
               .childDirectory('xcschemes')
               .childFile('Runner.xcscheme');
           expect(xcschemeFile.existsSync(), isTrue);
-          expect(
-            xcschemeFile.readAsStringSync(),
-            contains('Run Prepare Flutter Framework Script'),
-          );
+          expect(xcschemeFile.readAsStringSync(), contains('Run Prepare Flutter Framework Script'));
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
@@ -137,15 +138,15 @@ void main() {
               appDirectoryPath: appDirectoryPath,
             ),
           );
-
         } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
-          ErrorHandlingFileSystem.deleteIfExists(
-            workingDirectory,
-            recursive: true,
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
           );
+          ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
-      }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
-    }
+      },
+      skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
+    );
   }
 }

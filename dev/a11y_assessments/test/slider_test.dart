@@ -16,15 +16,14 @@ void main() {
     await tester.tapAt(tester.getCenter(find.byType(Slider)));
     await tester.pumpAndSettle();
 
-    final MainWidgetState state =
-        tester.state<MainWidgetState>(find.byType(MainWidget));
+    final MainWidgetState state = tester.state<MainWidgetState>(find.byType(MainWidget));
     expect(state.currentSliderValue, 60);
   });
-  testWidgets('slider semantics wrapper exists', (WidgetTester tester) async {
+
+  testWidgets('slider text label exists', (WidgetTester tester) async {
     await pumpsUseCase(tester, SliderUseCase());
-    final Finder semanticsWidget =
-        find.bySemanticsLabel('Accessibility Test Slider');
-    expect(semanticsWidget, findsOneWidget);
+    final Finder labelWidget = find.text('My Slider');
+    expect(labelWidget, findsOneWidget);
   });
 
   testWidgets('slider demo page has one h1 tag', (WidgetTester tester) async {

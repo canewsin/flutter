@@ -1,56 +1,31 @@
-This page covers additional information that is specific to contributing to flutter/packages. If you aren't already familiar with the general guidance on Flutter contribution, start with [Tree hygiene](../../contributing/Tree-hygiene.md).
+This page covers additional information that is specific to contributing to flutter/packages and flutter/core-packages. If you aren't already familiar with the general guidance on Flutter contribution, start with [Tree hygiene](../../contributing/Tree-hygiene.md).
 
 ## Version and CHANGELOG updates
 
-Most changes need version and CHANGELOG changes; see below for details.
+Most changes need version and CHANGELOG change information; see below for details.
 
-In most cases, the easiest way to create them is to use [the `update-release-info` repository command](https://github.com/flutter/packages/blob/main/script/tool/README.md#update-changelog-and-version). If you are adding a feature, use `--version=minor`, otherwise `--version=minimal` will almost always do the right thing.
+In most cases, the easiest way to handle version and CHANGELOG updates is to use [the `update-release-info` repository command](https://github.com/flutter/packages/blob/main/script/tool/README.md#update-changelog-and-version). If you are adding a feature, use `--version=minor`, otherwise `--version=minimal` will almost always do the right thing.
 
-### Version
+If you are not using `update-release-info`, you will need to determine whether the package you are changing uses the continuous or [batched](../release/README.md#batch-release) release model, and follow the appropriate instructions below. If the package has a top-level `ci_config.yaml` setting `release:batch:true`, then it uses batched release, otherwise it defaults to continuous release.
 
-Any change that needs to be published in order to take effect must update the version in `pubspec.yaml`. There are very few exceptions:
-- PRs that only affect tests.
-- PRs that only affect unpublished parts of example apps.
-- PRs that only affect local development of the package (e.g., changes to ignored lints).
-- Breaking change batching (see below).
-- Non-code changes that we make to future-proof development in some way, but don't directly benefit clients. Examples of this include
-    - Updating the minimum Dart or Flutter SDK for all packages when we adjust our test matrix.
-    - Updating the minimum OS version of plugins to match changes to [Flutter support](https://docs.flutter.dev/reference/supported-platforms) (on `stable`).
+*Version-exempt changes should still include a CHANGELOG entry if they are relevant
+to package clients (for example, updating the minimum SDK version, or adding
+new example code to a page other than `main.dart`). The repository CI errs on
+the side of false positives, so will sometimes flag a PR as needing a CHANGELOG
+entry even if the change is not relevant to clients. If a Flutter team member
+feels that the changes in a PR would not be relevant to package clients, they
+can leave a comment explaining why, and add the `override: no changelog needed`
+label to skip this check.*
 
-  (Unless you are a member of the Flutter team, you are likely not making changes that fall under this exemption.)
-
-This is because the packages in flutter/packages use a continuous release model rather than a set release cadence. This model gets improvements to the community faster, makes regressions easier to pinpoint, and simplifies the release process.
-
-(The `override: no versioning needed` label can be added to skip this check, but only if the criteria above are met, or team members agree there is a compelling reason for a new exemption. Team members: please leave a comment when adding the `override` label explaining the reason for the override.)
-
-### CHANGELOG
-
-All version changes must have an accompanying CHANGELOG update. Even version-exempt changes should often update CHANGELOG by adding a special `NEXT` entry at the top of `CHANGELOG.md` (unless they only affect development of the package, such as test-only changes):
-```
-## NEXT
-
-* Description of the change.
-
-## 1.0.2
-...
-```
-
-This policy exists because some changes (e.g., certain updates to examples) that do not need to be published may still be of interest to clients of a package.
-
-The tooling errs on the side of false positives, so will sometimes flag changes that should be exempt for one of the reasons listed above. In these cases, or if the reviewer feels that the change would not be relevant to package clients, they can add the `override: no changelog needed` label can to skip this check. Team members: please leave a comment when adding the `override` label explaining the reason for the override.
-
-#### CHANGELOG style
+### CHANGELOG style
 
 For consistency, all CHANGELOG entries should follow a common style:
-- Use `##` for the version line. A version line should have a blank line before and after it.
-- Use `*` for individual items.
-  - Exception: When editing an existing CHANGELOG that uses `-`, use that instead for local consistency.
 - Entries should use present tense indicative for verbs, with "this version" as an implied subject. For example, "Adds cool new feature.",
   not "Add", "Added", or "Adding".
 - Entries should end with a `.`.
-- Breaking changes should be introduced with `**BREAKING CHANGE**:`, or `**BREAKING CHANGES**:`
-  if there is a sub-list of changes.
+- Breaking changes should be introduced with `**BREAKING CHANGE**:`, or `**BREAKING CHANGES**:` if there is a sub-list of changes.
   - Breaking change notifications should include information about how to migrate. If extensive migration is required, this can be a reference to a longer description elsewhere (usually README.md) rather than inline instructions.
+- Code references should be enclosed in backticks.
 
 Example:
 ```
@@ -66,42 +41,104 @@ Example:
 * Fixes a crash when the device teleports during a network operation.
 ```
 
-#### Updating a CHANGELOG that has a `NEXT`
+### Continuous release
 
-*Note: If you are using `update-release-info`, this will be handled correctly for you.*
+Most packages in flutter/packages use a continuous release model rather than a set release cadence. This model gets improvements to the community faster, makes regressions easier to pinpoint, and simplifies the release process.
 
-If you are adding a version change to a CHANGELOG that starts with `NEXT`, and your change also doesn't require a version update, just add a description to the existing `NEXT` list:
-```
-## NEXT
+#### Version
 
-* Description of your new change.
-* Existing entry.
+Any change that needs to be published in order to take effect must update the version in `pubspec.yaml`. There are very few exceptions:
+- PRs that only affect tests.
+- PRs that only affect unpublished parts of example apps.
+- PRs that only affect local development of the package (e.g., changes to ignored lints).
+- Breaking change batching (see below).
+- Non-code changes that we make to future-proof development in some way, but don't directly benefit clients. Examples of this include
+    - Updating the minimum Dart or Flutter SDK for all packages when we adjust our test matrix.
+    - Updating the minimum OS version of plugins to match changes to [Flutter support](https://docs.flutter.dev/reference/supported-platforms) (on `stable`).
 
-## 1.0.2
-...
-```
+  (Unless you are a member of the Flutter team, you are likely not making changes that fall under this exemption.)
 
-If your change does require a version change, do the same, but then replace `NEXT` with the new version. For example:
+*The `override: no versioning needed` label can be added to skip this check if it fails, but only if the criteria above are met, or team members agree there is a compelling reason for a new exemption. Team members: please leave a comment when adding the `override` label explaining the reason for the override.*
+
+#### CHANGELOG
+
+All version changes must have an accompanying `CHANGELOG.md` update. As noted
+above, version-exempt changes should also have a CHANGELOG entry if they are
+relevant to package clients.
+
+- If you are using `update-release-info`, this will be handled correctly for you.
+- If you prefer to make the change manually, make sure to follow the relevant
+  instructions below, as well as the following additional style rules:
+  - Use `##` for the version line. A version line should have a blank line before and after it.
+  - Use `*` for individual items.
+    - Exception: When editing a file that already uses `-`, use that instead for local consistency.
+
+##### Versioned change
+
+For the common case where you are making a versioned change and there is no
+`## NEXT` section in the `CHANGELOG.md`, simply add the new version as the topmost
+section:
 
 ```
 ## 1.0.3
 
 * Description of your new change.
-* Existing entry.
 
 ## 1.0.2
 ...
 ```
 
-If you leave `NEXT` when adding a version change, automated tests for your PR will fail.
+If there is a `## NEXT` section at the top of the `CHANGELOG.md` (from a
+previous version-exempt change; see below), convert that section into a
+numbered release section, adding your entry as the first line:
 
-### FAQ
+```
+## 1.0.3
+
+* Description of your new change.
+* Previous version-exempt entry.
+
+## 1.0.2
+...
+```
+
+##### Version-exempt change
+
+For the rare case of a version-exempt change, use a special `NEXT` entry at the
+top of `CHANGELOG.md`:
+
+```
+## NEXT
+
+* Description of your new version-exempt change.
+
+## 1.0.2
+...
+```
+
+If there is already a `NEXT` section, add your change to the existing list:
+
+```
+## NEXT
+
+* Description of your new version-exempt change.
+* Previous version-exempt entry.
+
+## 1.0.2
+...
+```
+
+#### FAQ
 
 **Do I need to update the version if I'm just changing the README?** Yes. Most people read the README on pub.dev, not GitHub, so a README change is not very useful unless it is published.
 
 **Do I need to update the version if I'm just changing comments?** If the comment is intended for clients of the package (a `///` comment on anything exported by the package), then yes, since what developers using the package will see in their IDE will come from the published version. If the comment is only useful for someone working on the package (such as an implementation comment within a method, or a comment in a non-exported file), then no.
 
 **What do I do if I there are conflicts to those changes before or during review?** This is common. You can leave the conflicts until you're at the end of the review process to avoid needing to resolve frequently. Including the version changes at the beginning despite the likelihood of conflicts makes it much harder to forget that step, and also means that a reviewer can easily fix it from the GitHub UI just before landing.
+
+### Batched release
+
+Packages that receive a large number of PRs use a batched release model, both to avoid constant conflicts in `CHANGELOG.md` and `pubspec.yaml`, and to avoid constantly having new releases on pub.dev. For packages using batched release, any change that requires a CHANGELOG entry requires a new file in the package's `pending_changes/` directory. To do this without `update-release-info`, copy `template.yaml` to a new file with a descriptive name in the same directory, then edit it to have the correct CHANGELOG entry and version type.
 
 ### Breaking changes
 
@@ -114,7 +151,7 @@ Because we prefer to minimize breaking changes to packages after 1.0, breaking c
 
 ## Dependencies
 
-We try to minimize external package dependencies as much as possible, where "external" means packages that are not generally within the control of the Flutter or Dart teams (Examples non-external packages include `sdk:` dependencies, packages in flutter/packages, and packages published by dart.dev), or by an organization with a track record of strong support for both engineering best practices and Flutter. This is for several reasons:
+We try to minimize external package dependencies as much as possible, where "external" means packages that are not generally within the control of the Flutter or Dart teams (examples of non-external packages include `sdk:` dependencies, and packages published by flutter.dev or dart.dev), or by an organization with a track record of strong support for both engineering best practices and Flutter. This is for several reasons:
 - Maintainability:
     - We have a policy of always supporting Flutter `master`; if we can't guarantee that fixes for breaking changes can be landed immediately in dependencies, it can block our roller.
     - If a package is abandoned by its authors, we will have to fork or migrate in order to unblock the entire repository.
@@ -125,11 +162,32 @@ If you are considering adding an external dependency:
 - Consider other options, and discuss with #hackers-ecosystem in Discord.
 - If you add a `dev_dependency` on an external package, pin it to a specific version if at all possible.
 - If you add a `dependency` on an external package in an `example/`, pin it to a specific version if at all possible.
-- Some dependencies should only be linked as dev_dependencies like integration_test
+- If you add a non-dev, non-example dependency on an external package, a formal approval is required, and all of the following must be true:
+  - The dependency is necessary for a high-priority product/feature.
+  - The code has an OSS license, and the original source repository is available.
+  - The dependency has an exact upper bound set to a version that has been reviewed by the Flutter team
+  - The ecosystem TL and PM are confident that the code could be forked and maintained by the Flutter team if it were to become necessary (e.g., if the package were later abandoned).
 
 ### Native dependencies
 
 The same general principles apply to native dependencies for plugins (e.g., dependencies specified in an Android Gradle file or iOS podspec file): minimize dependencies—and especially non-test dependencies—on libraries that are not created by either the platform vendor or another organization with a track record of strong support for engineering best practices in whom we can have a very high degree of confidence in ongoing support and prompt updates.
+
+### Dev dependencies
+
+Some dependencies should only be linked as dev_dependencies, such as `integration_test`. Known dev-only dependencies are checked by CI, and if you are adding a new dev-only dependency, consider adding it to
+[the repository tooling checks](https://github.com/flutter/packages/blob/main/script/tool/lib/src/pubspec_check_command.dart).
+
+### Dependency versions
+
+Our general policy is not to update the minimum version of a dependency beyond what the package requires. For instance:
+- We do not regularly make the app-facing package in a federated plugin require the latest bugfix versions of all platform implementation packages just so that people who do not regularly update their transitive dependencies get the latest bugfixes. Our view is that clients who want updates should update their transitive dependencies (`dart pub upgrade`, or `dart pub upgrade --unlock-transitive <package>` for targeted updates), rather than us artificially pushing transitive dependency updates on everyone.
+- When a dependency updates its major version, and the breaking changes do not affect our usage, we expand the constrain to *add* the new major version to the range, rather than requiring the new major version. This minimizes version lock in the ecosystem (where clients are unable to use the latest version of two different packages because each requires a specific, different major version).
+
+We do update minimum versions when it is actually required, such as a breaking change that does affect our usage, or when adding a new feature to the app-facing package in a federated plugin that relies on new APIs in the other sub-packages of that plugin. In most cases, the `analyze_downgraded` CI task will catch cases where that is necessary, but in some cases we rely on PR authors and reviewers (for example, when exposing a new feature in a federated plugin it is often possible to compile with only the platform interface package's minimum version updated, but the feature may throw `UnimplementedError`s at runtime if the implementation package versions are not updated as well).
+
+This is a general policy rather than a hard rule. If you believe you have an exceptional case, please discuss with your reviewer and/or with the `#hackers-ecosystem` Discord channel. Examples of cases where we have made exceptions include:
+- Fixes for serious security issues in dependencies.
+- Changes in dependencies that clients *must* adopt for external reasons, such as policy changes in a platform's app store.
 
 ## Platform Support
 
@@ -137,7 +195,7 @@ The goal is to have any plugin feature work on every platform on which that feat
 
 Given that, we welcome PRs that only implement a feature for a subset of platforms, including just one. To set expectations for how such PRs will be handled:
 - They will not be fully reviewed until there's an understanding of what support would look like across other platforms, for several reasons:
-  - API for features that will be permanently platform-specific may structured in ways that make that limitation more clear, so knowing if other platforms can support it will affect the review process.
+  - API for features that will be permanently platform-specific might be structured in ways that make that limitation more clear, so knowing if other platforms can support it will affect the review process.
   - We want to avoid over-fitting the plugin APIs to a single platform's API. It is often the case that several platforms can implement a feature, but the behavior is different enough across platforms that we need to design the API in a way that covers those variations in a cohesive way. This means that knowing at a high level what the implementation on other platform also affects the review process.
   - Features that are missing implementations on some platforms need to be clearly documented as such in the API, and those comments should clearly express whether those platform are temporarily missing implementations, or are not expected to ever have implementations due to platform limitations.
 
@@ -163,12 +221,35 @@ if (somePluginInstance.supportsDoingThing) {
 
 rather than hard-coding a platform check. (See [`image_picker`'s `supportsImageSource`](https://github.com/flutter/packages/blob/9323e33ed9d8345d87514711dcaeb4cf4159ad1c/packages/image_picker/image_picker/lib/image_picker.dart#L309-L315) for an example.) This is for several reasons:
 - It is federation-friendly: a new implementation of the plugin (including the addition of 1P support for a previously-unsupported platform) will automatically be covered.
-- It allow seamless adoption of new functionality: if we add previously-missing support to an existing implementation, clients will automatically benefit without any code changes on their part.
+- It allows seamless adoption of new functionality: if we add previously-missing support to an existing implementation, clients will automatically benefit without any code changes on their part.
 - It makes our own documentation more evergreen: we've frequently had app-facing APIs that had a comment saying that an API is only available on platform X, and then forgotten to update it when adding support for platform Y.
 
 These APIs can take a variety of forms, including specific methods to check individual methods or parameters, a single method with an enum of API options, etc. Discuss with your reviewer what pattern is best suited to the specific case, and aim for consistency within a plugin when possible.
 
 *We currently have many cases of APIs that do not follow this guidance because they predate it. This is technical debt, rather than something that should be pointed to as a justification for adding new APIs that do not.*
+
+### Documentation
+
+In federated plugins, platform-specific behaviors are controlled by the platform implementation packages, so documentation about platform-specific behaviors should, when at all possible, only be in the platform implementation packages. Any cross-package platform documentation is very likely to become stale, or be misleading depending on the resolved package versions. It also does not scale to unendorsed implementations. Some best practices:
+- READMEs of app-facing packages should delegate documentation of platform-specific details to implementation package READMEs, where details can be updated in sync with the implementation, and link to those platform-specific READMEs. [`google_sign_in` configuration](https://pub.dev/packages/google_sign_in#setup) is an example of this pattern.
+- Do not make definitive statements about platform support in documentation comments in either the app-facing or platform interface packages. For example, if a parameter supports Android but not iOS it is much better to say "May not be supported on all platforms" (and if necessary include a note in the iOS README) than to say "This only works on Android", which will become incorrect if iOS support is added later and could be incorrect for any third-party unendorsed implementation.
+  - It's fine to include examples as long as the statements aren't definitive. For example, this comment from `google_sign_in`:
+    > The amount of allowable UI is up to the platform to determine, but it should be minimal. Possible examples include FedCM on the web, and One Tap on Android.
+
+    This sets expectations, without claiming that a given platform definitely will or will not behave a certain way.
+
+*We currently have cases of comments that do not follow this guidance because they predate it. This is technical debt, rather than something that should be pointed to as a justification for adding new comments that do it.*
+
+### OS version support
+
+Whenever feasible, plugins should support the same OS versions that [Flutter supports](https://docs.flutter.dev/reference/supported-platforms). When a plugin's platform implementation is updated to require a version of Flutter that drops a previously-supported OS version, the plugin should be updated to drop that version as well (for example, updating minimum versions in native build files and removing runtime version checks for versions that are no longer supported).
+
+If a new plugin is being created, or a plugin is being extended to a new platform, it's fine to require a newer OS version if there is a good reason to do so. For instance, if it would require adding significant already-deprecated codepaths that would cause a maintenance burden, it may not be worth supporting older OS versions.
+
+For existing plugins, dropping support for OS versions that are still supported by Flutter (or supported by older versions of Flutter that are still within the allowance of the package's `pubspec.yaml` Flutter constraint) is **very disruptive**: because `pub` does not have information about OS version support, dropping previously-supported OS versions is build breaking for clients. There are three possible approaches to dropping an OS version from an existing plugin:
+1. Wait for Flutter to drop that version, then set the minimum SDK version accordingly before/while dropping the OS version in the plugin. This means that a client still targeting the dropped version can never resolve to the version of the package that dropped support, so it is a no-op for clients. This is the **strongly preferred** approach.
+2. Drop the version as a breaking change. Keep in mind that this must be a breaking change not only for the implementation package, but also for the app-facing package when updating to use the new major version of the implementation package, so should be discussed with the ecosystem team in advance. This approach ensures that clients have appropriate breaking change notification, and have to opt in to the new version.
+3. While it is **strongly discouraged**, in rare cases we have dropped OS version support without a major version change. This should be done only if a major version change would be disruptive to the ecosystem and the OS version drop cannot be delayed until after Flutter has dropped it. For example, if continuing to support an older OS version would require continuing to use an older version of an SDK that has a significant security vulnerability, this approach could be warranted. This should only be done if the costs of one of the two previous approaches is so high that causing unexpected build breakage for plugin clients is a better outcome.
 
 ## Languages
 
@@ -191,13 +272,31 @@ On some platforms, there are multiple native languages that can be used to write
 
 For all platforms, use of Dart for platform-specific features is both allowed and encouraged. While there are no specific rules about this in most plugins, in general we are moving toward having more logic written in Dart rather than a host language, as having more code in the project's primary language eases maintenance.
 
+## Generated code
+
+### Pigeon
+
+Most plugins in flutter/packages use [`pigeon`](https://pub.dev/packages/pigeon) for communication between Dart and host-language code. Unless a package lists specific instructions in its CONTRIBUTING.md file, after changing a Pigeon interface definition file in the `pigeons/` directory run:
+   ```sh
+   $ dart run pigeon --input pigeons/[changed file]
+   ```
+
+If the package's tests have mocks, they likely include mocks of Pigeon-generated classes; see below for instructions to update the mocks to reflect the changes in the Pigeon-generated code.
+
+### Mockito
+
+Many packages use [`mockito`](https://pub.dev/packages/mockito) for unit tests. To regenerate mocks run:
+   ```sh
+   $ dart run build_runner build --delete-conflicting-outputs
+   ```
+
 ## Changing federated plugins
 
-Most of the plugins in flutter/packages are [federated](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#federated-plugins). Because a logical plugin consists of multiple packages, and our CI tests using published package dependencies—in order to ensure that every PR can be published without breaking the ecosystem—changes that span multiple packages will need to be done in multiple PRs. This is common when adding new features.
+Most of the plugins in flutter/packages are [federated](https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins). Because a logical plugin consists of multiple packages, and our CI tests using published package dependencies—in order to ensure that every PR can be published without breaking the ecosystem—changes that span multiple packages will need to be done in multiple PRs. This is common when adding new features.
 
 We are investigating ways to streamline this, but currently the process for a multi-package PR is:
 
-1. Create a PR that has all the changes, and update the pubspec.yamls to have path-based dependency overrides. This can be done with the [plugin repo tool](https://github.com/flutter/packages/blob/main/script/tool/README.md)'s `make-deps-path-based` command, targeting any dependency packages changed in the PR. For instance, for an Android-specific change to `video_player` that required platform interface changes as well:
+1. Create a PR that has all the changes, and update the `pubspec.yaml` files to have path-based dependency overrides. This can be done with the [plugin repo tool](https://github.com/flutter/packages/blob/main/script/tool/README.md)'s `make-deps-path-based` command, targeting any dependency packages changed in the PR. For instance, for an Android-specific change to `video_player` that required platform interface changes as well:
     ```
     $ dart run script/tool/bin/flutter_plugin_tools.dart make-deps-path-based --target-dependencies=video_player_platform_interface,video_player_android
     ```
@@ -238,7 +337,7 @@ This makes it easy for someone looking back at the change to find the reason for
 
 ### Changing platform interface method parameters
 
-Because platform implementations are subclasses of the platform interface and override its methods, almost *any* change to the parameters of a method is a breaking change. In particular, adding an optional parameter to a platform interface method *is* a breaking change even though it doesn't break callers of the the method.
+Because platform implementations are subclasses of the platform interface and override its methods, almost *any* change to the parameters of a method is a breaking change. In particular, adding an optional parameter to a platform interface method *is* a breaking change even though it doesn't break callers of the method.
 
 The least disruptive way to make a parameter change is:
 
@@ -306,7 +405,7 @@ The only exception to this policy is plugins that are inherently specific to a s
 
 ### In-package platform channels
 
-All implementations should use in-package platform channels, for the reasons outlined in [the proposal document](https://flutter.dev/go/platform-channels-in-federated-plugins). Most plugins that predate this policy and have a legacy "shared method channel" default implementation in the platform interface package, but it is not be used by any first-party implementations.
+All implementations should use in-package platform channels, for the reasons outlined in [the proposal document](https://flutter.dev/go/platform-channels-in-federated-plugins). Many plugins that predate this policy have a legacy "shared method channel" default implementation in the platform interface package, but it is not used by any first-party implementations.
 
 ### Platform exception handling
 

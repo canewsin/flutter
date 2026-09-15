@@ -18,7 +18,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icons.dart';
-import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -132,6 +131,7 @@ class InputChip extends StatelessWidget
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
@@ -178,7 +178,7 @@ class InputChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
-  final MaterialStateProperty<Color?>? color;
+  final WidgetStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -209,15 +209,17 @@ class InputChip extends StatelessWidget
   final BoxConstraints? deleteIconBoxConstraints;
   @override
   final ChipAnimationStyle? chipAnimationStyle;
+  @override
+  final MouseCursor? mouseCursor;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _InputChipDefaultsM3(context, isEnabled, selected)
-      : null;
-    final Widget? resolvedDeleteIcon = deleteIcon
-      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
+        ? _InputChipDefaultsM3(context, isEnabled, selected)
+        : null;
+    final Widget? resolvedDeleteIcon =
+        deleteIcon ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -257,6 +259,7 @@ class InputChip extends StatelessWidget
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
+      mouseCursor: mouseCursor,
     );
   }
 }
@@ -268,6 +271,7 @@ class InputChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _InputChipDefaultsM3 extends ChipThemeData {
   _InputChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
@@ -292,15 +296,15 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get color =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected) && states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.secondaryContainer;
       }
       return null;
@@ -329,7 +333,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => !isSelected
     ? isEnabled
-      ? BorderSide(color: _colors.outline)
+      ? BorderSide(color: _colors.outlineVariant)
       : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
@@ -365,5 +369,6 @@ class _InputChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - InputChip

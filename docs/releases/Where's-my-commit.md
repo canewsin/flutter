@@ -8,13 +8,13 @@ This page outlines the current process for determining that information.
 
 ## Process
 
-### Finding the Dart SDK commit contained in Engine commit X
+### Finding the Dart SDK commit contained in Flutter SDK commit X
 
-To find out which Dart SDK sha is contained in a particular commit of the Flutter engine:
+To find out which Dart SDK sha is contained in a particular Flutter SDK commit:
 
-1. Let the engine commit be _ENGINE_COMMIT_
+1. Let the Flutter SDK commit be FLUTTER_COMMIT
 
-1. Navigate to https://github.com/flutter/engine/blob/${ENGINE_COMMIT}/DEPS#L51 and search for the value corresponding to the _'dart_revision'_ key.
+2. Navigate to https://github.com/flutter/flutter/blob/${FLUTTER_COMMIT}/DEPS and search for the value corresponding to the _'dart_revision'_ key.
 
 ***
 
@@ -104,7 +104,7 @@ To find out when a given Dart SDK change rolled into the engine:
 
    **Important**: be sure to adjust for timezones when comparing times between the Dart SDK commit and the time when the engine commits landed.
 
-1. Once you've found a candidate commit, click on the hyperlink of the commit description to go to the commit details page.  The full commit description will list what Dart SDK comitts were contained in the roll.  For example:
+1. Once you've found a candidate commit, click on the hyperlink of the commit description to go to the commit details page.  The full commit description will list what Dart SDK commits were contained in the roll.  For example:
 
    <img src="https://user-images.githubusercontent.com/15253456/63283634-9ee87d00-c266-11e9-8960-3424cd2e8de1.png" alt="Commits contained in the Dart SDK roll" width="65%;" />
 

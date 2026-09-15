@@ -7,21 +7,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/platform.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/editable_text_utils.dart';
+import 'editable_text_utils.dart';
 
 Finder findCupertinoOverflowNextButton() {
   return find.byWidgetPredicate((Widget widget) {
-    return widget is CustomPaint && '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter';
+    return widget is CustomPaint &&
+        '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter';
   });
 }
 
 Finder findCupertinoOverflowBackButton() {
   return find.byWidgetPredicate((Widget widget) {
-    return widget is CustomPaint && '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter';
+    return widget is CustomPaint &&
+        '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter';
   });
 }
 
-Future<void> tapCupertinoOverflowNextButton(WidgetTester tester) async{
+Future<void> tapCupertinoOverflowNextButton(WidgetTester tester) async {
   await tester.tapAt(tester.getCenter(findCupertinoOverflowNextButton()));
   await tester.pumpAndSettle();
 }

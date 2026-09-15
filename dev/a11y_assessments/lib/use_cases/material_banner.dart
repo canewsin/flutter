@@ -3,15 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../utils.dart';
 import 'use_cases.dart';
 
 class MaterialBannerUseCase extends UseCase {
+  MaterialBannerUseCase();
+
   @override
   String get name => 'MaterialBanner';
 
   @override
   String get route => '/material_banner';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -25,7 +31,6 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
-
   final FocusNode dismissButtonFocusNode = FocusNode();
   final FocusNode showButtonFocusNode = FocusNode();
 
@@ -49,7 +54,6 @@ class MainWidgetState extends State<MainWidget> {
         padding: const EdgeInsets.all(20),
         content: const Text('Hello, I am a Material Banner'),
         leading: const Icon(Icons.agriculture_outlined),
-        backgroundColor: Colors.yellowAccent,
         actions: <Widget>[
           TextButton(
             focusNode: dismissButtonFocusNode,
@@ -64,11 +68,8 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+    return Scaffold(
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Center(
         child: ElevatedButton(
           focusNode: showButtonFocusNode,

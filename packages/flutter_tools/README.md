@@ -79,7 +79,7 @@ Please avoid setting any other timeouts.
 
 The integration tests can be configured to use a specific local engine
 variant by setting the `FLUTTER_LOCAL_ENGINE` and `FLUTTER_LOCAL_ENGINE_HOST`
-environment svariable to the name of the local engines (e.g. `android_debug_unopt`
+environment variables to the name of the local engines (e.g. `android_debug_unopt`
 and `host_debug_unopt`). If the local engine build requires a source path, this
 can be provided by setting the `FLUTTER_LOCAL_ENGINE_SRC_PATH` environment
 variable. This second variable is not necessary if the `flutter` and `engine`
@@ -123,10 +123,21 @@ You can run the tests in a specific file, e.g.:
 $ flutter test test/general.shard/utils_test.dart
 ```
 
-### Forcing snapshot regeneration
+### Forcing Flutter Tools Snapshot Regeneration
 
-To force the Flutter Tools snapshot to be regenerated, delete the following
-files:
-```shell
-$ rm ../../bin/cache/flutter_tools.stamp ../../bin/cache/flutter_tools.snapshot
+To force the Flutter Tools snapshot to be regenerated, delete these files:
+
+- `flutter_tools.stamp`
+- `flutter_tools.snapshot`
+
+**On macOS/Linux:**
+
+```bash
+rm ../../bin/cache/flutter_tools.stamp ../../bin/cache/flutter_tools.snapshot
+```
+
+**On Windows:**
+
+```bat
+del ..\..\bin\cache\flutter_tools.stamp ..\..\bin\cache\flutter_tools.snapshot
 ```
